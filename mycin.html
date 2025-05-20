@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode DSA Progress Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background: #181c20; color: #e0e6ed; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; min-height: 100vh; }
+    .header { background: #23272f; color: #fff; padding: 1.2rem 2rem; font-size: 1.7rem; font-weight: bold; letter-spacing: 1px; box-shadow: 0 2px 8px #0003; }
+    .main { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; background: #181c20; }
+    .cards { display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .card { background: #23272f; border-radius: 12px; box-shadow: 0 2px 8px #0003; padding: 1.5rem 2rem; flex: 1 1 180px; min-width: 180px; text-align: center; }
+    .card h2 { margin: 0.5rem 0 0.2rem; font-size: 2.2rem; color: #00e676; }
+    .card span { font-size: 1.1rem; color: #b0b8c1; }
+    .circular-trackers { display: flex; gap: 2rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+    .circular-progress { width: 120px; height: 120px; background: conic-gradient(#23272f 0deg, #23272f 360deg); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; margin: 0 auto; box-shadow: 0 2px 8px #0003; }
+    .circular-progress .inner-circle { width: 88px; height: 88px; background: #181c20; border-radius: 50%; position: absolute; top: 16px; left: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; z-index: 2; font-weight: bold; }
+    .circular-progress .percentage { font-size: 1.5em; color: #fff; margin-bottom: 0.2em; }
+    .circular-label { text-align: center; margin-top: 0.5em; font-weight: 500; color: #b0b8c1; }
+    .chart-container { background: #23272f; border-radius: 12px; box-shadow: 0 2px 8px #0003; padding: 2rem; max-width: 600px; margin: 2rem auto; }
+    .questions-section { margin-top: 3rem; background: #23272f; border-radius: 10px; padding: 2rem 1rem 2rem 1rem; box-shadow: 0 2px 8px #0003; }
+    .questions-section h2 { color: #00e676; margin-bottom: 1.5rem; margin-top: 0; }
+    .questions-columns { display: flex; gap: 2rem; justify-content: space-between; flex-wrap: wrap; }
+    .questions-col { flex: 1 1 0; min-width: 280px; background: #23272f; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .questions-col h3 { margin-top: 0; text-align: center; }
+    .questions-table { width: 100%; border-collapse: collapse; background: #23272f; color: #e0e6ed; }
+    .questions-table th, .questions-table td { padding: 0.5em 0.4em; text-align: left; }
+    .questions-table th { background: #1a1d23; color: #00e676; font-weight: 600; }
+    .questions-table tr { border-bottom: 1px solid #20232a; }
+    .questions-table tr:last-child { border-bottom: none; }
+    .questions-table td { color: #e0e6ed; }
+    .questions-table input[type="checkbox"] { transform: scale(1.2); accent-color: #00e676; }
+    .pagination { text-align: center; margin: 0.7em 0 0.5em 0; }
+    .pagination button { background: #23272f; color: #00e676; border: 1px solid #00e676; border-radius: 5px; margin: 0 0.15em; padding: 0.2em 0.8em; font-size: 1em; cursor: pointer; }
+    .pagination button.active, .pagination button:focus { background: #00e676; color: #23272f; }
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+    @media (max-width: 900px) {
+      .cards, .circular-trackers, .questions-columns { flex-direction: column; gap: 1rem; }
+      .main { padding: 1rem; }
+    }
+  </style>
+  <style>
+  .custom-navbar {
+  background: #23272f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px #0003;
+}
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.navbar-title {
+  font-weight: bold;
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+}
+.navbar-search {
+  display: flex;
+  align-items: center;
+  background: #181c20;
+  border-radius: 5px;
+  padding: 2px 8px;
+}
+.navbar-search input {
+  border: none;
+  background: transparent;
+  color: #e0e6ed;
+  outline: none;
+  padding: 6px 4px;
+  font-size: 1rem;
+  width: 180px;
+  transition: width 0.3s;
+}
+.navbar-search button {
+  background: none;
+  border: none;
+  color: #00e676;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+.navbar-right a {
+  color: #b0b8c1;
+  font-size: 1.4rem;
+  transition: color 0.2s;
+}
+.navbar-right a:hover {
+  color: #00e676;
+}
+.navbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+@media (max-width: 700px) {
+  .custom-navbar {
+    flex-wrap: wrap;
+    padding: 0.7rem 1rem;
+  }
+  .navbar-left, .navbar-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .navbar-right {
+    margin-top: 0.6rem;
+  }
+  .navbar-search input {
+    width: 100px;
+  }
+  .navbar-toggle {
+    display: block;
+    margin-left: auto;
+  }
+  .navbar-right {
+    display: none;
+    flex-direction: column;
+    background: #23272f;
+    width: 100%;
+    padding: 0.5rem 0;
+    position: absolute;
+    right: 0;
+    top: 56px;
+    z-index: 101;
+  }
+  .navbar-right.active {
+    display: flex;
+  }
+}
+
+  </style>
+</head>
+<body>
+<nav class="custom-navbar">
+  <div class="navbar-left">
+    <span class="navbar-title">LeetCode DSA Progress Dashboard</span>
+    <div class="navbar-search">
+      <input id="question-search" type="text" placeholder="Search questions..." autocomplete="off">
+      <button id="search-btn"><i class="fa fa-search"></i></button>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <a href="https://www.linkedin.com/in/md-shafaque-37973b280/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    <a href="https://github.com/mdshafaque56/" target="_blank" title="YouTube"><i class="fab fa-github"></i></a>
+    <a href="https://md-shafaque-ai-uxavfu2.gamma.site/" target="_blank" title="Website"><i class="fa fa-globe"></i></a>
+  </div>
+  <button class="navbar-toggle" id="navbar-toggle"><i class="fa fa-bars"></i></button>
+</nav>
+
+  <div class="main">
+    <div class="cards">
+      <div class="card" id="easy-card">
+        <span>Easy Solved</span>
+        <h2 id="easy-count">0</h2>
+      </div>
+      <div class="card" id="medium-card">
+        <span>Medium Solved</span>
+        <h2 id="medium-count">0</h2>
+      </div>
+      <div class="card" id="hard-card">
+        <span>Hard Solved</span>
+        <h2 id="hard-count">0</h2>
+      </div>
+    </div>
+    <div class="circular-trackers">
+      <div>
+        <div class="circular-progress" id="easy-circular" data-progress-color="#00e676">
+          <div class="inner-circle">
+            <span class="percentage" id="easy-percentage">0%</span>
+            <span style="font-size:0.9em; color:#00e676;">Easy</span>
+          </div>
+        </div>
+        <div class="circular-label">Easy Progress</div>
+      </div>
+      <div>
+        <div class="circular-progress" id="medium-circular" data-progress-color="#ffea00">
+          <div class="inner-circle">
+            <span class="percentage" id="medium-percentage">0%</span>
+            <span style="font-size:0.9em; color:#ffea00;">Medium</span>
+          </div>
+        </div>
+        <div class="circular-label">Medium Progress</div>
+      </div>
+      <div>
+        <div class="circular-progress" id="hard-circular" data-progress-color="#ff3d00">
+          <div class="inner-circle">
+            <span class="percentage" id="hard-percentage">0%</span>
+            <span style="font-size:0.9em; color:#ff3d00;">Hard</span>
+          </div>
+        </div>
+        <div class="circular-label">Hard Progress</div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="barChart"></canvas>
+    </div>
+    <div class="questions-section">
+      <h2>All Questions (Paginated)</h2>
+      <div class="questions-columns" id="questions-columns"></div>
+    </div>
+  </div>
+  
+  <script>
+  // Responsive navbar toggle
+  document.getElementById('navbar-toggle').onclick = function() {
+    document.querySelector('.navbar-right').classList.toggle('active');
+  };
+
+  // Search filtering logic
+  const searchInput = document.getElementById('question-search');
+  searchInput.addEventListener('input', function() {
+    filterQuestions(this.value.trim().toLowerCase());
+  });
+
+  function filterQuestions(query) {
+    // Use your existing questions variable
+    let filtered = questions.filter(q =>
+      q['Question Title'].toLowerCase().includes(query) ||
+      q['Question ID'].toLowerCase().includes(query)
+    );
+    // Re-render the questions section with filtered questions
+    renderFilteredQuestions(filtered);
+  }
+
+  function renderFilteredQuestions(filteredQuestions) {
+    // Use your groupByDifficulty and render logic, but with filteredQuestions
+    const groups = groupByDifficulty(filteredQuestions);
+    const container = document.getElementById('questions-columns');
+    container.innerHTML = '';
+    ['Easy', 'Medium', 'Hard'].forEach(diff => {
+      // ... (copy your renderQuestions logic here, but use groups[diff])
+      // You can copy the inner code from your renderQuestions function,
+      // replacing 'questions' with 'filteredQuestions' as needed.
+      // For brevity, you can call renderQuestions() if query is empty.
+    });
+    // If query is empty, reset to full list
+    if (!searchInput.value.trim()) renderQuestions();
+  }
+</script>
+
+  <script>
+    // Load CSV from attachment (copy-paste the full CSV string from your file here)
+    const csvData = `Question ID,Question Title,Difficulty Level
+Question ID,Question Title,Difficulty Level
+1,Two Sum,Easy
+9,Palindrome Number,Easy
+13,Roman to Integer,Easy
+14,Longest Common Prefix,Easy
+20,Valid Parentheses,Easy
+21,Merge Two Sorted Lists,Easy
+26,Remove Duplicates from Sorted Array,Easy
+27,Remove Element,Easy
+28,Implement strStr(),Easy
+35,Search Insert Position,Easy
+53,Maximum Subarray,Easy
+58,Length of Last Word,Easy
+66,Plus One,Easy
+67,Add Binary,Easy
+69,Sqrt(x),Easy
+70,Climbing Stairs,Easy
+83,Remove Duplicates from Sorted List,Easy
+88,Merge Sorted Array,Easy
+94,Binary Tree Inorder Traversal,Easy
+100,Same Tree,Easy
+101,Symmetric Tree,Easy
+104,Maximum Depth of Binary Tree,Easy
+108,Convert Sorted Array to Binary Search Tree,Easy
+110,Balanced Binary Tree,Easy
+111,Minimum Depth of Binary Tree,Easy
+112,Path Sum,Easy
+118,Pascal's Triangle,Easy
+119,Pascal's Triangle II,Easy
+121,Best Time to Buy and Sell Stock,Easy
+125,Valid Palindrome,Easy
+136,Single Number,Easy
+141,Linked List Cycle,Easy
+144,Binary Tree Preorder Traversal,Easy
+145,Binary Tree Postorder Traversal,Easy
+155,Min Stack,Easy
+157,Read N Characters Given Read4,Easy
+160,Intersection of Two Linked Lists,Easy
+163,Missing Ranges,Easy
+168,Excel Sheet Column Title,Easy
+169,Majority Element,Easy
+170,Two Sum III - Data structure design,Easy
+171,Excel Sheet Column Number,Easy
+175,Combine Two Tables,Easy
+181,Employees Earning More Than Their Managers,Easy
+182,Duplicate Emails,Easy
+183,Customers Who Never Order,Easy
+190,Reverse Bits,Easy
+191,Number of 1 Bits,Easy
+193,Valid Phone Numbers,Easy
+195,Tenth Line,Easy
+196,Delete Duplicate Emails,Easy
+197,Rising Temperature,Easy
+202,Happy Number,Easy
+203,Remove Linked List Elements,Easy
+205,Isomorphic Strings,Easy
+206,Reverse Linked List,Easy
+217,Contains Duplicate,Easy
+219,Contains Duplicate II,Easy
+225,Implement Stack using Queues,Easy
+226,Invert Binary Tree,Easy
+228,Summary Ranges,Easy
+231,Power of Two,Easy
+232,Implement Queue using Stacks,Easy
+234,Palindrome Linked List,Easy
+235,Lowest Common Ancestor of a Binary Search Tree,Easy
+237,Delete Node in a Linked List,Easy
+242,Valid Anagram,Easy
+243,Shortest Word Distance,Easy
+246,Strobogrammatic Number,Easy
+252,Meeting Rooms,Easy
+257,Binary Tree Paths,Easy
+258,Add Digits,Easy
+263,Ugly Number,Easy
+266,Palindrome Permutation,Easy
+268,Missing Number,Easy
+270,Closest Binary Search Tree Value,Easy
+278,First Bad Version,Easy
+283,Move Zeroes,Easy
+290,Word Pattern,Easy
+292,Nim Game,Easy
+293,Flip Game,Easy
+303,Range Sum Query - Immutable,Easy
+326,Power of Three,Easy
+338,Counting Bits,Easy
+342,Power of Four,Easy
+344,Reverse String,Easy
+345,Reverse Vowels of a String,Easy
+346,Moving Average from Data Stream,Easy
+349,Intersection of Two Arrays,Easy
+350,Intersection of Two Arrays II,Easy
+359,Logger Rate Limiter,Easy
+367,Valid Perfect Square,Easy
+374,Guess Number Higher or Lower,Easy
+383,Ransom Note,Easy
+387,First Unique Character in a String,Easy
+389,Find the Difference,Easy
+392,Is Subsequence,Easy
+401,Binary Watch,Easy
+404,Sum of Left Leaves,Easy
+405,Convert a Number to Hexadecimal,Easy
+408,Valid Word Abbreviation,Easy
+409,Longest Palindrome,Easy
+412,Fizz Buzz,Easy
+414,Third Maximum Number,Easy
+415,Add Strings,Easy
+422,Valid Word Square,Easy
+434,Number of Segments in a String,Easy
+441,Arranging Coins,Easy
+448,Find All Numbers Disappeared in an Array,Easy
+455,Assign Cookies,Easy
+459,Repeated Substring Pattern,Easy
+461,Hamming Distance,Easy
+463,Island Perimeter,Easy
+476,Number Complement,Easy
+482,License Key Formatting,Easy
+485,Max Consecutive Ones,Easy
+492,Construct the Rectangle,Easy
+495,Teemo Attacking,Easy
+496,Next Greater Element I,Easy
+500,Keyboard Row,Easy
+501,Find Mode in Binary Search Tree,Easy
+504,Base 7,Easy
+506,Relative Ranks,Easy
+507,Perfect Number,Easy
+520,Detect Capital,Easy
+521,Longest Uncommon Subsequence I,Easy
+530,Minimum Absolute Difference in BST,Easy
+541,Reverse String II,Easy
+543,Diameter of Binary Tree,Easy
+551,Student Attendance Record I,Easy
+557,Reverse Words in a String III,Easy
+561,Array Partition I,Easy
+563,Binary Tree Tilt,Easy
+566,Reshape the Matrix,Easy
+572,Subtree of Another Tree,Easy
+575,Distribute Candies,Easy
+577,Employee Bonus,Easy
+584,Find Customer Referee,Easy
+586,Customer Placing the Largest Number of Orders,Easy
+594,Longest Harmonious Subsequence,Easy
+595,Big Countries,Easy
+596,Classes More Than 5 Students,Easy
+597,Friend Requests I: Overall Acceptance Rate,Easy
+598,Range Addition II,Easy
+599,Minimum Index Sum of Two Lists,Easy
+603,Consecutive Available Seats,Easy
+604,Design Compressed String Iterator,Easy
+605,Can Place Flowers,Easy
+606,Construct String from Binary Tree,Easy
+607,Sales Person,Easy
+610,Triangle Judgement,Easy
+613,Shortest Distance in a Line,Easy
+617,Merge Two Binary Trees,Easy
+619,Biggest Single Number,Easy
+620,Not Boring Movies,Easy
+627,Swap Salary,Easy
+628,Maximum Product of Three Numbers,Easy
+637,Average of Levels in Binary Tree,Easy
+643,Maximum Average Subarray I,Easy
+645,Set Mismatch,Easy
+653,Two Sum IV - Input is a BST,Easy
+657,Robot Return to Origin,Easy
+661,Image Smoother,Easy
+671,Second Minimum Node In a Binary Tree,Easy
+674,Longest Continuous Increasing Subsequence,Easy
+680,Valid Palindrome II,Easy
+682,Baseball Game,Easy
+693,Binary Number with Alternating Bits,Easy
+696,Count Binary Substrings,Easy
+697,Degree of an Array,Easy
+716,Max Stack,Easy
+717,1-bit and 2-bit Characters,Easy
+724,Find Pivot Index,Easy
+728,Self Dividing Numbers,Easy
+733,Flood Fill,Easy
+734,Sentence Similarity,Easy
+742,To Lower Case,Easy
+745,Find Smallest Letter Greater Than Target,Easy
+747,Min Cost Climbing Stairs,Easy
+748,Largest Number At Least Twice of Others,Easy
+749,Shortest Completing Word,Easy
+762,Find Anagram Mappings,Easy
+767,Prime Number of Set Bits in Binary Representation,Easy
+774,Maximum Depth of N-ary Tree,Easy
+775,N-ary Tree Preorder Traversal,Easy
+776,N-ary Tree Postorder Traversal,Easy
+777,Toeplitz Matrix,Easy
+782,Jewels and Stones,Easy
+783,Search in a Binary Search Tree,Easy
+789,Kth Largest Element in a Stream,Easy
+792,Binary Search,Easy
+799,Minimum Distance Between BST Nodes,Easy
+812,Rotate String,Easy
+816,Design HashSet,Easy
+817,Design HashMap,Easy
+818,Similar RGB Color,Easy
+822,Unique Morse Code Words,Easy
+824,Number of Lines To Write String,Easy
+830,Largest Triangle Area,Easy
+837,Most Common Word,Easy
+841,Shortest Distance to a Character,Easy
+851,Goat Latin,Easy
+857,Positions of Large Groups,Easy
+861,Flipping an Image,Easy
+866,Rectangle Overlap,Easy
+874,Backspace String Compare,Easy
+882,Peak Index in a Mountain Array,Easy
+889,Buddy Strings,Easy
+890,Lemonade Change,Easy
+898,Transpose Matrix,Easy
+899,Binary Gap,Easy
+904,Leaf-Similar Trees,Easy
+908,Middle of the Linked List,Easy
+919,Projection Area of 3D Shapes,Easy
+920,Uncommon Words from Two Sentences,Easy
+924,Fair Candy Swap,Easy
+928,Surface Area of 3D Shapes,Easy
+932,Monotonic Array,Easy
+933,Increasing Order Search Tree,Easy
+941,Sort Array By Parity,Easy
+944,Smallest Range I,Easy
+950,X of a Kind in a Deck of Cards,Easy
+953,Reverse Only Letters,Easy
+958,Sort Array By Parity II,Easy
+961,Long Pressed Name,Easy
+965,Unique Email Addresses,Easy
+969,Number of Recent Calls,Easy
+974,Reorder Data in Log Files,Easy
+975,Range Sum of BST,Easy
+978,Valid Mountain Array,Easy
+979,DI String Match,Easy
+981,Delete Columns to Make Sorted,Easy
+990,Verifying an Alien Dictionary,Easy
+1001,N-Repeated Element in Size 2N Array,Easy
+1005,Univalued Binary Tree,Easy
+1013,Fibonacci Number,Easy
+1018,Largest Perimeter Triangle,Easy
+1019,Squares of a Sorted Array,Easy
+1031,Add to Array-Form of Integer,Easy
+1035,Cousins in Binary Tree,Easy
+1039,Find the Town Judge,Easy
+1041,Available Captures for Rook,Easy
+1044,Find Common Characters,Easy
+1047,Maximize Sum Of Array After K Negations,Easy
+1054,Complement of Base 10 Integer,Easy
+1062,Partition Array Into Three Parts With Equal Sum,Easy
+1066,Fixed Point,Easy
+1069,Confusing Number,Easy
+1071,Binary Prefix Divisible By 5,Easy
+1074,High Five,Easy
+1075,Index Pairs of a String,Easy
+1078,Remove Outermost Parentheses,Easy
+1079,Sum of Root To Leaf Binary Numbers,Easy
+1082,Sum of Digits in the Minimum Number,Easy
+1083,Two Sum Less Than K,Easy
+1086,Divisor Game,Easy
+1088,Number of Days in a Month,Easy
+1089,Remove Vowels from a String,Easy
+1090,Armstrong Number,Easy
+1094,Matrix Cells in Distance Order,Easy
+1098,Largest Unique Number,Easy
+1102,Check If a Number Is Majority Element in a Sorted Array,Easy
+1112,Find Words That Can Be Formed by Characters,Easy
+1115,Valid Boomerang,Easy
+1123,Single-Row Keyboard,Easy
+1127,Last Stone Weight,Easy
+1128,Remove All Adjacent Duplicates In String,Easy
+1131,Count Substrings with Only One Distinct Letter,Easy
+1136,Actors and Directors Who Cooperated At Least Three Times,Easy
+1137,Height Checker,Easy
+1141,How Many Apples Can You Put into the Basket,Easy
+1146,Greatest Common Divisor of Strings,Easy
+1149,Intersection of Three Sorted Arrays,Easy
+1153,Product Sales Analysis I,Easy
+1154,Product Sales Analysis II,Easy
+1156,Occurrences After Bigram,Easy
+1161,Project Employees I,Easy
+1162,Project Employees II,Easy
+1164,Missing Number In Arithmetic Progression,Easy
+1168,Duplicate Zeros,Easy
+1172,Sales Analysis I,Easy
+1173,Sales Analysis II,Easy
+1174,Sales Analysis III,Easy
+1175,Array Transformation,Easy
+1179,Game Play Analysis I,Easy
+1180,Game Play Analysis II,Easy
+1195,Distribute Candies to People,Easy
+1199,Hexspeak,Easy
+1203,Print in Order,Easy
+1205,Defanging an IP Address,Easy
+1210,Mean of Array After Removing Some Elements,Easy
+1215,Reported Posts,Easy
+1217,Relative Sort Array,Easy
+1221,Element Appearing More Than 25% In Sorted Array,Easy
+1227,Number of Equivalent Domino Pairs,Easy
+1231,Replace Elements with Greatest Element on Right Side,Easy
+1236,N-th Tribonacci Number,Easy
+1241,Decompress Run-Length Encoded List,Easy
+1245,User Activity for the Past 30 Days I,Easy
+1246,User Activity for the Past 30 Days II,Easy
+1256,Rank Transform of an Array,Easy
+1258,Article Views I,Easy
+1260,Day of the Year,Easy
+1264,Maximum Number of Words You Can Type,Easy
+1274,Number of Days Between Two Dates,Easy
+1279,Prime Arrangements,Easy
+1280,Diet Plan Performance,Easy
+1283,Reformat Date,Easy
+1287,Distance Between Bus Stops,Easy
+1289,Day of the Week,Easy
+1291,Immediate Food Delivery I,Easy
+1293,Three Consecutive Odds,Easy
+1297,Maximum Number of Balloons,Easy
+1301,Reformat Department Table,Easy
+1302,Delete Characters to Make Fancy String,Easy
+1306,Minimum Absolute Difference,Easy
+1319,Unique Number of Occurrences,Easy
+1329,Minimum Cost to Move Chips to The Same Position,Easy
+1338,Queries Quality and Percentage,Easy
+1341,Split a String in Balanced Strings,Easy
+1345,Perform String Shifts,Easy
+1349,Check If It Is a Straight Line,Easy
+1377,Number of Comments per Post,Easy
+1378,Cells with Odd Values in a Matrix,Easy
+1386,Shift 2D Grid,Easy
+1390,Average Selling Price,Easy
+1391,Counting Elements,Easy
+1392,Find the Difference of Two Arrays,Easy
+1395,Minimum Time Visiting All Points,Easy
+1400,Find Winner on a Tic Tac Toe Game,Easy
+1406,Subtract the Product and Sum of Digits of an Integer,Easy
+1410,Traffic Light Controlled Intersection,Easy
+1411,Convert Binary Number in a Linked List to Integer,Easy
+1415,Students and Examinations,Easy
+1416,Check if an Array Is Consecutive,Easy
+1421,Find Numbers with Even Number of Digits,Easy
+1425,Weather Type in Each Country,Easy
+1426,Find N Unique Integers Sum up to Zero,Easy
+1434,Decrypt String from Alphabet to Integer Mapping,Easy
+1438,Find the Team Size,Easy
+1440,Convert Integer to the Sum of Two No-Zero Integers,Easy
+1444,Number of Steps to Reduce a Number to Zero,Easy
+1448,Maximum 69 Number,Easy
+1453,Ads Performance,Easy
+1454,Remove Palindromic Subsequences,Easy
+1458,Sort Integers by The Number of 1 Bits,Easy
+1462,List the Products Ordered in a Period,Easy
+1463,The K Weakest Rows in a Matrix,Easy
+1468,Check If N and Its Double Exist,Easy
+1472,Increasing Decreasing String,Easy
+1476,Count Negative Numbers in a Sorted Matrix,Easy
+1481,Students With Invalid Departments,Easy
+1482,How Many Numbers Are Smaller Than the Current Number,Easy
+1486,Find the Distance Value Between Two Arrays,Easy
+1490,Generate a String With Characters That Have Odd Counts,Easy
+1496,Lucky Numbers in a Matrix,Easy
+1500,Count Largest Group,Easy
+1505,Create Target Array in the Given Order,Easy
+1509,Replace Employee ID With The Unique Identifier,Easy
+1510,Find Lucky Integer in an Array,Easy
+1514,Minimum Value to Get Positive Step by Step Sum,Easy
+1519,Minimum Subsequence in Non-Increasing Order,Easy
+1524,String Matching in an Array,Easy
+1528,Kids With the Greatest Number of Candies,Easy
+1532,Reformat The String,Easy
+1537,Maximum Score After Splitting a String,Easy
+1541,Top Travellers,Easy
+1542,Consecutive Characters,Easy
+1547,Destination City,Easy
+1548,Check If All 1's Are at Least Length K Places Away,Easy
+1551,NPV Queries,Easy
+1552,Build an Array With Stack Operations,Easy
+1556,Make Two Arrays Equal by Reversing Sub-arrays,Easy
+1560,Number of Students Doing Homework at a Given Time,Easy
+1564,Create a Session Bar Chart,Easy
+1566,Check If a Word Occurs As a Prefix of Any Word in a Sentence,Easy
+1570,Final Prices With a Special Discount in a Shop,Easy
+1574,Maximum Product of Two Elements in an Array,Easy
+1580,Shuffle the Array,Easy
+1584,Average Salary Excluding the Minimum and Maximum Salary,Easy
+1603,Running Sum of 1d Array,Easy
+1609,Find All The Lonely Nodes,Easy
+1610,XOR Operation in an Array,Easy
+1618,Delete N Nodes After M Nodes of a Linked List,Easy
+1619,Path Crossing,Easy
+1625,Group Sold Products By The Date,Easy
+1626,Can Make Arithmetic Progression From Sequence,Easy
+1630,Count Odd Numbers in an Interval Range,Easy
+1635,Number of Good Pairs,Easy
+1639,Friendly Movies Streamed Last Month,Easy
+1642,Water Bottles,Easy
+1646,Kth Missing Positive Number,Easy
+1651,Shuffle String,Easy
+1654,Customer Order Frequency,Easy
+1656,Count Good Triplets,Easy
+1660,Thousand Separator,Easy
+1664,Find Users With Valid E-Mails,Easy
+1666,Make The String Great,Easy
+1670,Patients With a Condition,Easy
+1677,Matrix Diagonal Sum,Easy
+1682,Most Visited Sector in a Circular Track,Easy
+1686,Fix Product Name Format,Easy
+1689,Detect Pattern of Length M Repeated K or More Times,Easy
+1693,Sum of All Odd Length Subarrays,Easy
+1698,Replace All ?'s to Avoid Consecutive Repeating Characters,Easy
+1704,Special Positions in a Binary Matrix,Easy
+1708,Design Parking System,Easy
+1712,Unique Orders and Customers Per Month,Easy
+1714,Rearrange Spaces Between Words,Easy
+1718,Warehouse Manager,Easy
+1720,Crawler Log Folder,Easy
+1724,Customer Who Visited but Did Not Make Any Transactions,Easy
+1730,Special Array With X Elements Greater Than or Equal X,Easy
+1734,Bank Account Summary II,Easy
+1737,Maximum Nesting Depth of the Parentheses,Easy
+1741,Sort Array by Increasing Frequency,Easy
+1746,Largest Substring Between Two Equal Characters,Easy
+1749,Sellers With No Sales,Easy
+1751,Slowest Key,Easy
+1755,Defuse the Bomb,Easy
+1760,Check Array Formation Through Concatenation,Easy
+1763,All Valid Triplets That Can Represent a Country,Easy
+1764,Maximum Repeating Substring,Easy
+1769,Get Maximum in Generated Array,Easy
+1773,Percentage of Users Attended a Contest,Easy
+1775,Design an Ordered Stream,Easy
+1781,Check If Two String Arrays are Equivalent,Easy
+1786,Count the Number of Consistent Strings,Easy
+1791,Richest Customer Wealth,Easy
+1797,Goal Parser Interpretation,Easy
+1801,Average Time of Process per Machine,Easy
+1802,Number of Students Unable to Eat Lunch,Easy
+1806,Count of Matches in Tournament,Easy
+1811,Fix Names in a Table,Easy
+1812,Reformat Phone Number,Easy
+1817,Calculate Money in Leetcode Bank,Easy
+1821,Product's Worth Over Invoices,Easy
+1823,Determine if String Halves Are Alike,Easy
+1827,Invalid Tweets,Easy
+1829,Maximum Units on a Truck,Easy
+1833,Find the Highest Altitude,Easy
+1837,Daily Leads and Partners,Easy
+1839,Decode XORed Array,Easy
+1843,Number Of Rectangles That Can Form The Largest Square,Easy
+1844,Maximum Number of Balls in a Box,Easy
+1847,Largest Subarray Length K,Easy
+1848,Sum of Unique Elements,Easy
+1858,Latest Time by Replacing Hidden Digits,Easy
+1873,Longest Nice Substring,Easy
+1877,Find Followers Count,Easy
+1878,Check if Array Is Sorted and Rotated,Easy
+1882,The Number of Employees Which Report to Each Employee,Easy
+1884,Minimum Changes To Make Alternating Binary String,Easy
+1888,Find Nearest Point That Has the Same X or Y Coordinate,Easy
+1892,Find Total Time Spent by Each Employee,Easy
+1894,Merge Strings Alternately,Easy
+1899,Count Items Matching a Rule,Easy
+1904,Second Largest Digit in a String,Easy
+1908,Recyclable and Low Fat Products,Easy
+1910,Check if Binary String Has at Most One Segment of Ones,Easy
+1915,Check if One String Swap Can Make Strings Equal,Easy
+1916,Find Center of Star Graph,Easy
+1920,Determine Color of a Chessboard Square,Easy
+1926,Product's Price for Each Store,Easy
+1927,Maximum Ascending Subarray Sum,Easy
+1933,Number of Different Integers in a String,Easy
+1938,Minimum Operations to Make the Array Increasing,Easy
+1942,Primary Department for Each Employee,Easy
+1944,Truncate Sentence,Easy
+1948,Rearrange Products Table,Easy
+1950,Sign of the Product of an Array,Easy
+1954,Replace All Digits with Characters,Easy
+1958,Ad-Free Sessions,Easy
+1960,Check if the Sentence Is Pangram,Easy
+1965,Sum of Digits in Base K,Easy
+1970,Sorting the Sentence,Easy
+1974,Find Customers With Positive Revenue this Year,Easy
+1975,Minimum Distance to the Target Element,Easy
+1980,Faulty Sensor,Easy
+1983,Maximum Population Year,Easy
+1987,Substrings of Size Three with Distinct Characters,Easy
+1993,Sum of All Subset XOR Totals,Easy
+1999,Longer Contiguous Segments of Ones than Zeros,Easy
+2004,Convert Date Format,Easy
+2005,Check if All the Integers in a Range Are Covered,Easy
+2010,Check if Word Equals Summation of Two Words,Easy
+2015,Determine Whether Matrix Can Be Obtained By Rotation,Easy
+2020,Remove One Element to Make the Array Strictly Increasing,Easy
+2024,Calculate Special Bonus,Easy
+2025,Redistribute Characters to Make All Strings Equal,Easy
+2032,Largest Odd Number in String,Easy
+2037,Count Square Sum Triples,Easy
+2041,The Latest Login in 2020,Easy
+2042,Maximum Product Difference Between Two Pairs,Easy
+2048,Build Array from Permutation,Easy
+2053,Check if All Characters Have Equal Number of Occurrences,Easy
+2058,Concatenation of Array,Easy
+2070,Check if String Is Decomposable Into Value-Equal Substrings,Easy
+2076,Sum of Digits of String After Convert,Easy
+2083,Three Divisors,Easy
+2088,Minimum Time to Type Word Using Special Typewriter,Easy
+2092,Users That Actively Request Confirmation Messages,Easy
+2093,Check If String Is a Prefix of Array,Easy
+2099,Number of Strings That Appear as Substrings in Word,Easy
+2102,Find the Middle Index in Array,Easy
+2106,Find Greatest Common Divisor of Array,Easy
+2110,Employees With Missing Information,Easy
+2112,Minimum Difference Between Highest and Lowest of K Scores,Easy
+2116,Count Number of Pairs With Absolute Difference K,Easy
+2121,Find if Path Exists in Graph,Easy
+2122,Count Special Quadruplets,Easy
+2127,Employees Whose Manager Left the Company,Easy
+2128,Reverse Prefix of Word,Easy
+2132,Convert 1D Array Into 2D Array,Easy
+2137,Final Value of Variable After Performing Operations,Easy
+2144,Maximum Difference Between Increasing Elements,Easy
+2148,Minimum Number of Moves to Seat Everyone,Easy
+2154,Minimum Moves to Convert String,Easy
+2159,Two Out of Three,Easy
+2163,Kth Distinct String in an Array,Easy
+2168,Check if Numbers Are Ascending in a Sentence,Easy
+2172,Low-Quality Problems,Easy
+2173,Number of Valid Words in a Sentence,Easy
+2177,Check Whether Two Strings are Almost Equivalent,Easy
+2181,Smallest Index With Equal Value,Easy
+2186,Count Vowel Substrings of a String,Easy
+2190,Count Common Words With One Occurrence,Easy
+2195,Time Needed to Buy Tickets,Easy
+2199,Two Furthest Houses With Different Colors,Easy
+2204,Find Subsequence of Length K With the Largest Sum,Easy
+2210,Find Target Indices After Sorting Array,Easy
+2214,The Winner University,Easy
+2215,Finding 3-Digit Even Numbers,Easy
+2219,Maximum Number of Words Found in Sentences,Easy
+2223,The Number of Rich Customers,Easy
+2226,Rings and Rods,Easy
+2231,Find First Palindromic String in the Array,Easy
+2235,Capitalize the Title,Easy
+2238,A Number After a Double Reversal,Easy
+2243,Check if All A's Appears Before All B's,Easy
+2248,Minimum Cost of Buying Candies With Discount,Easy
+2254,Check if Every Row and Column Contains All Numbers,Easy
+2260,Divide a String Into Groups of Size k,Easy
+2264,Minimum Sum of Four Digit Number After Splitting Digits,Easy
+2269,Count Elements With Strictly Smaller and Greater Elements ,Easy
+2274,Keep Multiplying Found Values by Two,Easy
+2277,Count Equal and Divisible Pairs in an Array,Easy
+2283,Sort Even and Odd Indices Independently,Easy
+2288,Count Operations to Obtain Zero,Easy
+2292,Counting Words With a Given Prefix,Easy
+2298,Count Integers With Even Digit Sum,Easy
+2304,Cells in a Range on an Excel Sheet,Easy
+2308,Divide Array Into Equal Pairs,Easy
+2312,Most Frequent Number Following Key In an Array,Easy
+2316,Count Hills and Valleys in an Array,Easy
+2320,Find All K-Distant Indices in an Array,Easy
+2323,Minimum Bit Flips to Convert Number,Easy
+2327,Largest Number After Digit Swaps by Parity,Easy
+2336,The Number of Users That Are Eligible for Discount,Easy
+2345,Minimum Number of Operations to Convert Time,Easy
+2371,The Users That Are Eligible for Discount,Easy
+2383,Add Two Integers,Easy
+2384,Root Equals Sum of Children,Easy
+2,Add Two Numbers,Medium
+3,Longest Substring Without Repeating Characters,Medium
+5,Longest Palindromic Substring,Medium
+6,Zigzag Conversion,Medium
+7,Reverse Integer,Medium
+8,String to Integer (atoi),Medium
+11,Container With Most Water,Medium
+12,Integer to Roman,Medium
+15,3Sum,Medium
+16,3Sum Closest,Medium
+17,Letter Combinations of a Phone Number,Medium
+18,4Sum,Medium
+19,Remove Nth Node From End of List,Medium
+22,Generate Parentheses,Medium
+24,Swap Nodes in Pairs,Medium
+29,Divide Two Integers,Medium
+31,Next Permutation,Medium
+33,Search in Rotated Sorted Array,Medium
+34,Find First and Last Position of Element in Sorted Array,Medium
+36,Valid Sudoku,Medium
+38,Count and Say,Medium
+39,Combination Sum,Medium
+40,Combination Sum II,Medium
+43,Multiply Strings,Medium
+45,Jump Game II,Medium
+46,Permutations,Medium
+47,Permutations II,Medium
+48,Rotate Image,Medium
+49,Group Anagrams,Medium
+50,"Pow(x, n)",Medium
+54,Spiral Matrix,Medium
+55,Jump Game,Medium
+56,Merge Intervals,Medium
+57,Insert Interval,Medium
+59,Spiral Matrix II,Medium
+61,Rotate List,Medium
+62,Unique Paths,Medium
+63,Unique Paths II,Medium
+64,Minimum Path Sum,Medium
+71,Simplify Path,Medium
+73,Set Matrix Zeroes,Medium
+74,Search a 2D Matrix,Medium
+75,Sort Colors,Medium
+77,Combinations,Medium
+78,Subsets,Medium
+79,Word Search,Medium
+80,Remove Duplicates from Sorted Array II,Medium
+81,Search in Rotated Sorted Array II,Medium
+82,Remove Duplicates from Sorted List II,Medium
+86,Partition List,Medium
+89,Gray Code,Medium
+90,Subsets II,Medium
+91,Decode Ways,Medium
+92,Reverse Linked List II,Medium
+93,Restore IP Addresses,Medium
+95,Unique Binary Search Trees II,Medium
+96,Unique Binary Search Trees,Medium
+97,Interleaving String,Medium
+98,Validate Binary Search Tree,Medium
+99,Recover Binary Search Tree,Medium
+102,Binary Tree Level Order Traversal,Medium
+103,Binary Tree Zigzag Level Order Traversal,Medium
+105,Construct Binary Tree from Preorder and Inorder Traversal,Medium
+106,Construct Binary Tree from Inorder and Postorder Traversal,Medium
+107,Binary Tree Level Order Traversal II,Medium
+109,Convert Sorted List to Binary Search Tree,Medium
+113,Path Sum II,Medium
+114,Flatten Binary Tree to Linked List,Medium
+116,Populating Next Right Pointers in Each Node,Medium
+117,Populating Next Right Pointers in Each Node II,Medium
+120,Triangle,Medium
+122,Best Time to Buy and Sell Stock II,Medium
+128,Longest Consecutive Sequence,Medium
+129,Sum Root to Leaf Numbers,Medium
+130,Surrounded Regions,Medium
+131,Palindrome Partitioning,Medium
+133,Clone Graph,Medium
+134,Gas Station,Medium
+137,Single Number II,Medium
+138,Copy List with Random Pointer,Medium
+139,Word Break,Medium
+142,Linked List Cycle II,Medium
+143,Reorder List,Medium
+146,LRU Cache,Medium
+147,Insertion Sort List,Medium
+148,Sort List,Medium
+150,Evaluate Reverse Polish Notation,Medium
+151,Reverse Words in a String,Medium
+152,Maximum Product Subarray,Medium
+153,Find Minimum in Rotated Sorted Array,Medium
+156,Binary Tree Upside Down,Medium
+159,Longest Substring with At Most Two Distinct Characters,Medium
+161,One Edit Distance,Medium
+162,Find Peak Element,Medium
+165,Compare Version Numbers,Medium
+166,Fraction to Recurring Decimal,Medium
+167,Two Sum II - Input Array Is Sorted,Medium
+172,Factorial Trailing Zeroes,Medium
+173,Binary Search Tree Iterator,Medium
+176,Second Highest Salary,Medium
+177,Nth Highest Salary,Medium
+178,Rank Scores,Medium
+179,Largest Number,Medium
+180,Consecutive Numbers,Medium
+184,Department Highest Salary,Medium
+186,Reverse Words in a String II,Medium
+187,Repeated DNA Sequences,Medium
+189,Rotate Array,Medium
+192,Word Frequency,Medium
+194,Transpose File,Medium
+198,House Robber,Medium
+199,Binary Tree Right Side View,Medium
+200,Number of Islands,Medium
+201,Bitwise AND of Numbers Range,Medium
+204,Count Primes,Medium
+207,Course Schedule,Medium
+208,Implement Trie (Prefix Tree),Medium
+209,Minimum Size Subarray Sum,Medium
+210,Course Schedule II,Medium
+211,Design Add and Search Words Data Structure,Medium
+213,House Robber II,Medium
+215,Kth Largest Element in an Array,Medium
+216,Combination Sum III,Medium
+220,Contains Duplicate III,Medium
+221,Maximal Square,Medium
+222,Count Complete Tree Nodes,Medium
+223,Rectangle Area,Medium
+227,Basic Calculator II,Medium
+229,Majority Element II,Medium
+230,Kth Smallest Element in a BST,Medium
+236,Lowest Common Ancestor of a Binary Tree,Medium
+238,Product of Array Except Self,Medium
+240,Search a 2D Matrix II,Medium
+241,Different Ways to Add Parentheses,Medium
+244,Shortest Word Distance II,Medium
+245,Shortest Word Distance III,Medium
+247,Strobogrammatic Number II,Medium
+249,Group Shifted Strings,Medium
+250,Count Univalue Subtrees,Medium
+251,Flatten 2D Vector,Medium
+253,Meeting Rooms II,Medium
+254,Factor Combinations,Medium
+255,Verify Preorder Sequence in Binary Search Tree,Medium
+256,Paint House,Medium
+259,3Sum Smaller,Medium
+260,Single Number III,Medium
+261,Graph Valid Tree,Medium
+264,Ugly Number II,Medium
+267,Palindrome Permutation II,Medium
+271,Encode and Decode Strings,Medium
+274,H-Index,Medium
+275,H-Index II,Medium
+276,Paint Fence,Medium
+277,Find the Celebrity,Medium
+279,Perfect Squares,Medium
+280,Wiggle Sort,Medium
+281,Zigzag Iterator,Medium
+284,Peeking Iterator,Medium
+285,Inorder Successor in BST,Medium
+286,Walls and Gates,Medium
+287,Find the Duplicate Number,Medium
+288,Unique Word Abbreviation,Medium
+289,Game of Life,Medium
+291,Word Pattern II,Medium
+294,Flip Game II,Medium
+298,Binary Tree Longest Consecutive Sequence,Medium
+299,Bulls and Cows,Medium
+300,Longest Increasing Subsequence,Medium
+304,Range Sum Query 2D - Immutable,Medium
+306,Additive Number,Medium
+307,Range Sum Query - Mutable,Medium
+309,Best Time to Buy and Sell Stock with Cooldown,Medium
+310,Minimum Height Trees,Medium
+311,Sparse Matrix Multiplication,Medium
+313,Super Ugly Number,Medium
+314,Binary Tree Vertical Order Traversal,Medium
+316,Remove Duplicate Letters,Medium
+318,Maximum Product of Word Lengths,Medium
+319,Bulb Switcher,Medium
+320,Generalized Abbreviation,Medium
+322,Coin Change,Medium
+323,Number of Connected Components in an Undirected Graph,Medium
+324,Wiggle Sort II,Medium
+325,Maximum Size Subarray Sum Equals k,Medium
+328,Odd Even Linked List,Medium
+331,Verify Preorder Serialization of a Binary Tree,Medium
+333,Largest BST Subtree,Medium
+334,Increasing Triplet Subsequence,Medium
+337,House Robber III,Medium
+339,Nested List Weight Sum,Medium
+340,Longest Substring with At Most K Distinct Characters,Medium
+341,Flatten Nested List Iterator,Medium
+343,Integer Break,Medium
+347,Top K Frequent Elements,Medium
+348,Design Tic-Tac-Toe,Medium
+351,Android Unlock Patterns,Medium
+353,Design Snake Game,Medium
+355,Design Twitter,Medium
+356,Line Reflection,Medium
+357,Count Numbers with Unique Digits,Medium
+360,Sort Transformed Array,Medium
+361,Bomb Enemy,Medium
+362,Design Hit Counter,Medium
+364,Nested List Weight Sum II,Medium
+365,Water and Jug Problem,Medium
+366,Find Leaves of Binary Tree,Medium
+368,Largest Divisible Subset,Medium
+369,Plus One Linked List,Medium
+370,Range Addition,Medium
+371,Sum of Two Integers,Medium
+372,Super Pow,Medium
+373,Find K Pairs with Smallest Sums,Medium
+375,Guess Number Higher or Lower II,Medium
+376,Wiggle Subsequence,Medium
+377,Combination Sum IV,Medium
+378,Kth Smallest Element in a Sorted Matrix,Medium
+379,Design Phone Directory,Medium
+380,Insert Delete GetRandom O(1),Medium
+382,Linked List Random Node,Medium
+384,Shuffle an Array,Medium
+385,Mini Parser,Medium
+386,Lexicographical Numbers,Medium
+388,Longest Absolute File Path,Medium
+390,Elimination Game,Medium
+393,UTF-8 Validation,Medium
+394,Decode String,Medium
+395,Longest Substring with At Least K Repeating Characters,Medium
+396,Rotate Function,Medium
+397,Integer Replacement,Medium
+398,Random Pick Index,Medium
+399,Evaluate Division,Medium
+400,Nth Digit,Medium
+402,Remove K Digits,Medium
+406,Queue Reconstruction by Height,Medium
+413,Arithmetic Slices,Medium
+416,Partition Equal Subset Sum,Medium
+417,Pacific Atlantic Water Flow,Medium
+418,Sentence Screen Fitting,Medium
+419,Battleships in a Board,Medium
+421,Maximum XOR of Two Numbers in an Array,Medium
+423,Reconstruct Original Digits from English,Medium
+424,Longest Repeating Character Replacement,Medium
+433,Minimum Genetic Mutation,Medium
+435,Non-overlapping Intervals,Medium
+436,Find Right Interval,Medium
+437,Path Sum III,Medium
+438,Find All Anagrams in a String,Medium
+439,Ternary Expression Parser,Medium
+442,Find All Duplicates in an Array,Medium
+443,String Compression,Medium
+444,Sequence Reconstruction,Medium
+445,Add Two Numbers II,Medium
+447,Number of Boomerangs,Medium
+449,Serialize and Deserialize BST,Medium
+450,Delete Node in a BST,Medium
+451,Sort Characters By Frequency,Medium
+452,Minimum Number of Arrows to Burst Balloons,Medium
+453,Minimum Moves to Equal Array Elements,Medium
+454,4Sum II,Medium
+456,132 Pattern,Medium
+457,Circular Array Loop,Medium
+462,Minimum Moves to Equal Array Elements II,Medium
+464,Can I Win,Medium
+467,Unique Substrings in Wraparound String,Medium
+468,Validate IP Address,Medium
+469,Convex Polygon,Medium
+473,Matchsticks to Square,Medium
+474,Ones and Zeroes,Medium
+475,Heaters,Medium
+477,Total Hamming Distance,Medium
+481,Magical String,Medium
+484,Find Permutation,Medium
+486,Predict the Winner,Medium
+487,Max Consecutive Ones II,Medium
+490,The Maze,Medium
+491,Increasing Subsequences,Medium
+494,Target Sum,Medium
+498,Diagonal Traverse,Medium
+503,Next Greater Element II,Medium
+505,The Maze II,Medium
+508,Most Frequent Subtree Sum,Medium
+509,Inorder Successor in BST II,Medium
+510,Count Subarrays With More Ones Than Zeros,Medium
+511,All Paths from Source Lead to Destination,Medium
+512,Maximum Alternating Subarray Sum,Medium
+513,Find Bottom Left Tree Value,Medium
+515,Find Largest Value in Each Tree Row,Medium
+516,Longest Palindromic Subsequence,Medium
+518,Coin Change 2,Medium
+519,Widest Pair of Indices With Equal Range Sum,Medium
+522,Longest Uncommon Subsequence II,Medium
+523,Continuous Subarray Sum,Medium
+524,Longest Word in Dictionary through Deleting,Medium
+525,Contiguous Array,Medium
+526,Beautiful Arrangement,Medium
+528,Swapping Nodes in a Linked List,Medium
+529,Minesweeper,Medium
+531,Lonely Pixel I,Medium
+532,K-diff Pairs in an Array,Medium
+533,Lonely Pixel II,Medium
+535,Encode and Decode TinyURL,Medium
+536,Construct Binary Tree from String,Medium
+537,Complex Number Multiplication,Medium
+538,Convert BST to Greater Tree,Medium
+539,Minimum Time Difference,Medium
+540,Single Element in a Sorted Array,Medium
+542,01 Matrix,Medium
+544,Output Contest Matches,Medium
+545,Boundary of Binary Tree,Medium
+547,Number of Provinces,Medium
+549,Binary Tree Longest Consecutive Sequence II,Medium
+550,Shortest Path to Get Food,Medium
+553,Optimal Division,Medium
+554,Brick Wall,Medium
+555,Split Concatenated Strings,Medium
+556,Next Greater Element III,Medium
+560,Subarray Sum Equals K,Medium
+562,Longest Line of Consecutive One in Matrix,Medium
+565,Array Nesting,Medium
+567,Permutation in String,Medium
+570,Managers with at Least 5 Direct Reports,Medium
+573,Squirrel Simulation,Medium
+574,Winning Candidate,Medium
+576,Out of Boundary Paths,Medium
+578,Get Highest Answer Rate Question,Medium
+580,Count Student Number in Departments,Medium
+581,Shortest Unsorted Continuous Subarray,Medium
+582,Kill Process,Medium
+583,Delete Operation for Two Strings,Medium
+585,Investments in 2016,Medium
+592,Fraction Addition and Subtraction,Medium
+593,Valid Square,Medium
+602,Friend Requests II: Who Has the Most Friends,Medium
+608,Tree Node,Medium
+609,Find Duplicate File in System,Medium
+611,Valid Triangle Number,Medium
+612,Shortest Distance in a Plane,Medium
+614,Second Degree Follower,Medium
+616,Add Bold Tag in String,Medium
+621,Task Scheduler,Medium
+623,Add One Row to Tree,Medium
+624,Maximum Distance in Arrays,Medium
+625,Minimum Factorization,Medium
+626,Exchange Seats,Medium
+633,Sum of Square Numbers,Medium
+634,Find the Derangement of An Array,Medium
+635,Design Log Storage System,Medium
+636,Exclusive Time of Functions,Medium
+638,Shopping Offers,Medium
+640,Solve the Equation,Medium
+646,Maximum Length of Pair Chain,Medium
+647,Palindromic Substrings,Medium
+648,Replace Words,Medium
+649,Dota2 Senate,Medium
+650,2 Keys Keyboard,Medium
+651,4 Keys Keyboard,Medium
+652,Find Duplicate Subtrees,Medium
+654,Maximum Binary Tree,Medium
+655,Print Binary Tree,Medium
+658,Find K Closest Elements,Medium
+659,Split Array into Consecutive Subsequences,Medium
+662,Maximum Width of Binary Tree,Medium
+663,Equal Tree Partition,Medium
+665,Non-decreasing Array,Medium
+666,Path Sum IV,Medium
+667,Beautiful Arrangement II,Medium
+669,Trim a Binary Search Tree,Medium
+670,Maximum Swap,Medium
+672,Bulb Switcher II,Medium
+673,Number of Longest Increasing Subsequence,Medium
+676,Implement Magic Dictionary,Medium
+677,Map Sum Pairs,Medium
+678,Valid Parenthesis String,Medium
+681,Next Closest Time,Medium
+684,Redundant Connection,Medium
+686,Repeated String Match,Medium
+687,Longest Univalue Path,Medium
+688,Knight Probability in Chessboard,Medium
+690,Employee Importance,Medium
+692,Top K Frequent Words,Medium
+694,Number of Distinct Islands,Medium
+695,Max Area of Island,Medium
+698,Partition to K Equal Sum Subsets,Medium
+712,Minimum ASCII Delete Sum for Two Strings,Medium
+713,Subarray Product Less Than K,Medium
+714,Best Time to Buy and Sell Stock with Transaction Fee,Medium
+718,Maximum Length of Repeated Subarray,Medium
+720,Longest Word in Dictionary,Medium
+721,Accounts Merge,Medium
+722,Remove Comments,Medium
+723,Candy Crush,Medium
+725,Split Linked List in Parts,Medium
+729,My Calendar I,Medium
+731,My Calendar II,Medium
+735,Asteroid Collision,Medium
+737,Sentence Similarity II,Medium
+738,Monotone Increasing Digits,Medium
+739,Daily Temperatures,Medium
+740,Delete and Earn,Medium
+743,Closest Leaf in a Binary Tree,Medium
+744,Network Delay Time,Medium
+751,Number Of Corner Rectangles,Medium
+752,IP to CIDR,Medium
+753,Open the Lock,Medium
+755,Reach a Number,Medium
+756,Pour Water,Medium
+757,Pyramid Transition Matrix,Medium
+758,Convert Binary Search Tree to Sorted Doubly Linked List,Medium
+760,Bold Words in String,Medium
+764,N-ary Tree Level Order Traversal,Medium
+766,Flatten a Multilevel Doubly Linked List,Medium
+768,Partition Labels,Medium
+769,Largest Plus Sign,Medium
+772,Construct Quad Tree,Medium
+773,Logical OR of Two Binary Grids Represented as Quad-Trees,Medium
+778,Reorganize String,Medium
+780,Max Chunks To Make Sorted,Medium
+784,Insert into a Binary Search Tree,Medium
+786,Search in a Sorted Array of Unknown Size,Medium
+790,Global and Local Inversions,Medium
+791,Split BST,Medium
+793,Swap Adjacent in LR String,Medium
+795,K-th Symbol in Grammar,Medium
+797,Rabbits in Forest,Medium
+800,Letter Case Permutation,Medium
+801,Is Graph Bipartite?,Medium
+803,Cheapest Flights Within K Stops,Medium
+804,Rotated Digits,Medium
+805,Escape The Ghosts,Medium
+806,Domino and Tromino Tiling,Medium
+807,Custom Sort String,Medium
+808,Number of Matching Subsequences,Medium
+810,Valid Tic-Tac-Toe State,Medium
+811,Number of Subarrays with Bounded Maximum,Medium
+813,All Paths From Source to Target,Medium
+815,Champagne Tower,Medium
+820,Find Eventual Safe States,Medium
+825,Max Increase to Keep City Skyline,Medium
+826,Soup Servings,Medium
+827,Expressive Words,Medium
+829,Subdomain Visit Count,Medium
+831,Largest Sum of Averages,Medium
+832,Binary Tree Pruning,Medium
+834,Ambiguous Coordinates,Medium
+835,Linked List Components,Medium
+838,Design Linked List,Medium
+839,Short Encoding of Words,Medium
+842,Card Flipping Game,Medium
+843,Binary Trees With Factors,Medium
+850,Insert into a Sorted Circular Linked List,Medium
+852,Friends Of Appropriate Ages,Medium
+853,Most Profit Assigning Work,Medium
+858,Masking Personal Information,Medium
+859,Design Circular Deque,Medium
+860,Design Circular Queue,Medium
+862,Find And Replace in String,Medium
+864,Image Overlap,Medium
+867,New 21 Game,Medium
+868,Push Dominoes,Medium
+870,Magic Squares In Grid,Medium
+871,Keys and Rooms,Medium
+872,Split Array into Fibonacci Sequence,Medium
+875,Longest Mountain in Array,Medium
+876,Hand of Straights,Medium
+878,Shifting Letters,Medium
+879,Maximize Distance to Closest Person,Medium
+881,Loud and Rich,Medium
+883,Car Fleet,Medium
+885,Exam Room,Medium
+886,Score of Parentheses,Medium
+888,Mirror Reflection,Medium
+891,Score After Flipping Matrix,Medium
+893,All Nodes Distance K in Binary Tree,Medium
+896,Smallest Subtree with all the Deepest Nodes,Medium
+897,Prime Palindrome,Medium
+900,Reordered Power of 2,Medium
+901,Advantage Shuffle,Medium
+903,Implement Rand10() Using Rand7(),Medium
+905,Length of Longest Fibonacci Subsequence,Medium
+906,Walking Robot Simulation,Medium
+907,Koko Eating Bananas,Medium
+909,Stone Game,Medium
+912,Random Pick with Weight,Medium
+913,Random Flip Matrix,Medium
+914,Random Point in Non-overlapping Rectangles,Medium
+915,Generate Random Point in a Circle,Medium
+916,Decoded String at Index,Medium
+917,Boats to Save People,Medium
+921,Spiral Matrix III,Medium
+922,Possible Bipartition,Medium
+925,Construct Binary Tree from Preorder and Postorder Traversal,Medium
+926,Find and Replace Pattern,Medium
+929,Groups of Special-Equivalent Strings,Medium
+930,All Possible Full Binary Trees,Medium
+934,Bitwise ORs of Subarrays,Medium
+936,RLE Iterator,Medium
+937,Online Stock Span,Medium
+940,Fruit Into Baskets,Medium
+943,Sum of Subarray Minimums,Medium
+945,Snakes and Ladders,Medium
+946,Smallest Range II,Medium
+947,Online Election,Medium
+948,Sort an Array,Medium
+951,Partition Array into Disjoint Intervals,Medium
+952,Word Subsets,Medium
+954,Maximum Sum Circular Subarray,Medium
+955,Complete Binary Tree Inserter,Medium
+957,Minimum Add to Make Parentheses Valid,Medium
+959,3Sum With Multiplicity,Medium
+962,Flip String to Monotone Increasing,Medium
+966,Binary Subarrays With Sum,Medium
+967,Minimum Falling Path Sum,Medium
+968,Beautiful Array,Medium
+971,Shortest Bridge,Medium
+972,Knight Dialer,Medium
+976,Minimum Area Rectangle,Medium
+982,Minimum Increment to Make Array Unique,Medium
+983,Validate Stack Sequences,Medium
+984,Most Stones Removed with Same Row or Column,Medium
+985,Bag of Tokens,Medium
+986,Largest Time for Given Digits,Medium
+987,Reveal Cards In Increasing Order,Medium
+988,Flip Equivalent Binary Trees,Medium
+991,Array of Doubled Pairs,Medium
+992,Delete Columns to Make Sorted II,Medium
+994,Prison Cells After N Days,Medium
+998,Check Completeness of a Binary Tree,Medium
+999,Regions Cut By Slashes,Medium
+1002,Maximum Width Ramp,Medium
+1003,Minimum Area Rectangle II,Medium
+1006,Vowel Spellchecker,Medium
+1007,Numbers With Same Consecutive Differences,Medium
+1009,Pancake Sorting,Medium
+1010,Powerful Integers,Medium
+1011,Flip Binary Tree To Match Preorder Traversal,Medium
+1014,K Closest Points to Origin,Medium
+1016,Subarray Sums Divisible by K,Medium
+1020,Longest Turbulent Subarray,Medium
+1021,Distribute Coins in Binary Tree,Medium
+1023,Time Based Key-Value Store,Medium
+1025,Minimum Cost For Tickets,Medium
+1026,String Without AAA or BBB,Medium
+1027,Sum of Even Numbers After Queries,Medium
+1028,Interval List Intersections,Medium
+1030,Smallest String Starting From Leaf,Medium
+1032,Satisfiability of Equality Equations,Medium
+1033,Broken Calculator,Medium
+1036,Rotting Oranges,Medium
+1040,Maximum Binary Tree II,Medium
+1045,Check If Word Is Valid After Substitutions,Medium
+1046,Max Consecutive Ones III,Medium
+1048,Clumsy Factorial,Medium
+1049,Minimum Domino Rotations For Equal Row,Medium
+1050,Construct Binary Search Tree from Preorder Traversal,Medium
+1051,Shortest Way to Form String,Medium
+1052,Campus Bikes,Medium
+1053,Minimize Rounding Error to Meet Target,Medium
+1055,Pairs of Songs With Total Durations Divisible by 60,Medium
+1056,Capacity To Ship Packages Within D Days,Medium
+1058,Lexicographically Smallest Equivalent String,Medium
+1059,Missing Element in Sorted Array,Medium
+1060,Longest Repeating Substring,Medium
+1063,Best Sightseeing Pair,Medium
+1064,Smallest Integer Divisible by K,Medium
+1065,Binary String With Substrings Representing 1 To N,Medium
+1067,Campus Bikes II,Medium
+1070,Convert to Base -2,Medium
+1072,Next Greater Node In Linked List,Medium
+1073,Number of Enclaves,Medium
+1076,Brace Expansion,Medium
+1080,Camelcase Matching,Medium
+1081,Video Stitching,Medium
+1084,Find K-Length Substrings With No Repeated Characters,Medium
+1085,The Earliest Moment When Everyone Become Friends,Medium
+1087,Longest Arithmetic Subsequence,Medium
+1091,Maximum Average Subtree,Medium
+1092,Maximum Difference Between Node and Ancestor,Medium
+1095,Two City Scheduling,Medium
+1096,Maximum Sum of Two Non-Overlapping Subarrays,Medium
+1099,Path With Maximum Minimum Value,Medium
+1100,Connecting Cities With Minimum Cost,Medium
+1101,Parallel Courses,Medium
+1103,Moving Stones Until Consecutive,Medium
+1104,Coloring A Border,Medium
+1105,Uncrossed Lines,Medium
+1107,Minimum Swaps to Group All 1's Together,Medium
+1108,Analyze User Website Visit Pattern,Medium
+1111,Minimum Score Triangulation of Polygon,Medium
+1113,Moving Stones Until Consecutive II,Medium
+1114,Binary Search Tree to Greater Sum Tree,Medium
+1116,Maximum Level Sum of a Binary Tree,Medium
+1117,As Far from Land as Possible,Medium
+1119,Robot Bounded In Circle,Medium
+1120,Flower Planting With No Adjacent,Medium
+1121,Partition Array for Maximum Sum,Medium
+1125,Design File System,Medium
+1126,Minimum Cost to Connect Sticks,Medium
+1129,Longest String Chain,Medium
+1130,Last Stone Weight II,Medium
+1132,Before and After Puzzle,Medium
+1134,Shortest Distance to Target Color,Medium
+1135,Customers Who Bought All Products,Medium
+1138,Grumpy Bookstore Owner,Medium
+1139,Previous Permutation With One Swap,Medium
+1140,Distant Barcodes,Medium
+1142,Minimum Knight Moves,Medium
+1143,Find Smallest Common Element in All Rows,Medium
+1147,Flip Columns For Maximum Number of Equal Rows,Medium
+1148,Adding Two Negabinary Numbers,Medium
+1150,Two Sum BSTs,Medium
+1151,Stepping Numbers,Medium
+1155,Product Sales Analysis III,Medium
+1157,Insufficient Nodes in Root to Leaf Paths,Medium
+1159,Smallest Subsequence of Distinct Characters,Medium
+1160,Letter Tile Possibilities,Medium
+1163,Project Employees III,Medium
+1165,Meeting Scheduler,Medium
+1166,Toss Strange Coins,Medium
+1169,Largest Values From Labels,Medium
+1171,Shortest Path in Binary Matrix,Medium
+1176,Design A Leaderboard,Medium
+1177,Tree Diameter,Medium
+1181,Game Play Analysis III,Medium
+1182,Game Play Analysis IV,Medium
+1183,Statistics from a Large Sample,Medium
+1184,Car Pooling,Medium
+1186,Building H2O,Medium
+1187,Print FooBar Alternately,Medium
+1189,Encode Number,Medium
+1190,Smallest Common Region,Medium
+1191,Synonymous Sentences,Medium
+1194,Path In Zigzag Labelled Binary Tree,Medium
+1196,Filling Bookcase Shelves,Medium
+1198,Unpopular Books,Medium
+1200,Remove Interval,Medium
+1201,Delete Tree Nodes,Medium
+1204,New Users Daily Count,Medium
+1206,Corporate Flight Bookings,Medium
+1207,Delete Nodes And Return Forest,Medium
+1208,Maximum Nesting Depth of Two Valid Parentheses Strings,Medium
+1209,Design Bounded Blocking Queue,Medium
+1211,Iterator for Combination,Medium
+1212,Sequential Digits,Medium
+1214,Highest Grade For Each Student,Medium
+1216,Print Zero Even Odd,Medium
+1218,Lowest Common Ancestor of Deepest Leaves,Medium
+1219,Longest Well-Performing Interval,Medium
+1222,Remove Covered Intervals,Medium
+1225,Active Businesses,Medium
+1228,Minimum Cost Tree From Leaf Values,Medium
+1229,Shortest Path with Alternating Colors,Medium
+1230,Maximum of Absolute Value Expression,Medium
+1232,Sum of Mutated Array Closest to Target,Medium
+1237,Reported Posts II,Medium
+1238,Alphabet Board Path,Medium
+1239,Largest 1-Bordered Square,Medium
+1240,Stone Game II,Medium
+1242,Matrix Block Sum,Medium
+1243,Sum of Nodes with Even-Valued Grandparent,Medium
+1247,Decrease Elements To Make Array Zigzag,Medium
+1248,Binary Tree Coloring Game,Medium
+1249,Snapshot Array,Medium
+1250,Longest Common Subsequence,Medium
+1252,Break a Palindrome,Medium
+1253,Sort the Matrix Diagonally,Medium
+1254,Deepest Leaves Sum,Medium
+1259,Article Views II,Medium
+1261,Swap For Longest Repeated Character Substring,Medium
+1263,Number of Dice Rolls With Target Sum,Medium
+1267,Remove Zero Sum Consecutive Nodes from Linked List,Medium
+1268,Market Analysis I,Medium
+1271,Web Crawler,Medium
+1272,Invalid Transactions,Medium
+1273,Compare Strings by Frequency of the Smallest Character,Medium
+1275,Validate Binary Tree Nodes,Medium
+1276,Closest Divisors,Medium
+1278,Product Price at a Given Date,Medium
+1281,Can Make Palindrome from Substring,Medium
+1284,Four Divisors,Medium
+1285,Balance a Binary Search Tree,Medium
+1288,Maximum Subarray Sum with One Deletion,Medium
+1292,Immediate Food Delivery II,Medium
+1294,Range Frequency Queries,Medium
+1295,Minimum Garden Perimeter to Collect Enough Apples,Medium
+1298,Reverse Substrings Between Each Pair of Parentheses,Medium
+1299,K-Concatenation Maximum Sum,Medium
+1303,Minimum Moves to Reach Target Score,Medium
+1304,Longest Happy String,Medium
+1307,Ugly Number III,Medium
+1308,Smallest String With Swaps,Medium
+1310,Watering Plants,Medium
+1311,Largest Magic Square,Medium
+1312,Count Artifacts That Can Be Extracted,Medium
+1316,Fizz Buzz Multithreaded,Medium
+1317,Monthly Transactions I,Medium
+1320,Remove All Adjacent Duplicates in String II,Medium
+1321,Get Equal Substrings Within Budget,Medium
+1324,Where Will the Ball Fall,Medium
+1325,Path with Maximum Probability,Medium
+1327,Last Person to Fit in the Bus,Medium
+1328,Monthly Transactions II,Medium
+1330,Longest Arithmetic Subsequence of Given Difference,Medium
+1331,Path with Maximum Gold,Medium
+1333,Sort the Jumbled Numbers,Medium
+1335,Maximum Candies Allocated to K Children,Medium
+1339,Team Scores in Football Tournament,Medium
+1340,The Dining Philosophers,Medium
+1342,Queens That Can Attack the King,Medium
+1346,Maximize the Topmost Element After K Moves,Medium
+1350,Remove Sub-Folders from the Filesystem,Medium
+1351,Replace the Substring for Balanced String,Medium
+1354,Find Players With Zero or One Losses,Medium
+1355,Minimum Deletions to Make Array Beautiful,Medium
+1358,Find Positive Integer Solution for a Given Equation,Medium
+1359,Circular Permutation in Binary Representation,Medium
+1360,Maximum Length of a Concatenated String with Unique Characters,Medium
+1362,Airplane Seat Assignment Probability,Medium
+1364,Tuple with Same Product,Medium
+1366,First Unique Number,Medium
+1368,Web Crawler Multithreaded,Medium
+1369,Minimum Swaps to Make Strings Equal,Medium
+1370,Count Number of Nice Subarrays,Medium
+1371,Minimum Remove to Make Valid Parentheses,Medium
+1374,Leftmost Column with at Least a One,Medium
+1375,Find Palindrome With Fixed Length,Medium
+1379,Reconstruct a 2-Row Binary Matrix,Medium
+1380,Number of Closed Islands,Medium
+1383,Number of Single Divisor Triplets,Medium
+1384,Maximum Font to Fit a Sentence in a Screen,Medium
+1385,Number of Ways to Build House of Cards,Medium
+1387,Find Elements in a Contaminated Binary Tree,Medium
+1388,Greatest Sum Divisible by Three,Medium
+1396,Count Servers that Communicate,Medium
+1397,Search Suggestions System,Medium
+1399,Page Recommendations,Medium
+1401,Number of Burgers with No Waste of Ingredients,Medium
+1402,Count Square Submatrices with All Ones,Medium
+1404,Print Immutable Linked List in Reverse,Medium
+1405,All People Report to the Given Manager,Medium
+1407,Group the People Given the Group Size They Belong To,Medium
+1408,Find the Smallest Divisor Given a Threshold,Medium
+1413,Maximum Side Length of a Square with Sum Less than or Equal to Threshold,Medium
+1420,Find the Start and End Number of Continuous Ranges,Medium
+1422,Divide Array in Sets of K Consecutive Numbers,Medium
+1423,Maximum Number of Occurrences of a Substring,Medium
+1427,All Elements in Two Binary Search Trees,Medium
+1428,Jump Game III,Medium
+1431,All Ancestors of a Node in a Directed Acyclic Graph,Medium
+1432,Check If a String Is a Valid Sequence from Root to Leaves Path in a Binary Tree,Medium
+1435,XOR Queries of a Subarray,Medium
+1436,Get Watched Videos by Your Friends,Medium
+1439,Running Total for Different Genders,Medium
+1441,Minimum Flips to Make a OR b Equal to c,Medium
+1442,Number of Operations to Make Network Connected,Medium
+1445,Number of Sub-arrays of Size K and Average Greater than or Equal to Threshold,Medium
+1446,Angle Between Hands of a Clock,Medium
+1449,Print Words Vertically,Medium
+1450,Delete Leaves With a Given Value,Medium
+1452,Restaurant Growth,Medium
+1455,"Filter Restaurants by Vegan-Friendly, Price and Distance",Medium
+1456,Find the City With the Smallest Number of Neighbors at a Threshold Distance,Medium
+1459,Apply Discount Every n Orders,Medium
+1460,Number of Substrings Containing All Three Characters,Medium
+1464,Reduce Array Size to The Half,Medium
+1465,Maximum Product of Splitted Binary Tree,Medium
+1469,Minimum Number of Steps to Make Two Strings Anagram,Medium
+1470,Tweet Counts Per Frequency,Medium
+1473,Find the Longest Substring Containing Vowels in Even Counts,Medium
+1474,Longest ZigZag Path in a Binary Tree,Medium
+1477,Product of the Last K Numbers,Medium
+1478,Maximum Number of Events That Can Be Attended,Medium
+1480,Movie Rating,Medium
+1483,Rank Teams by Votes,Medium
+1484,Linked List in Binary Tree,Medium
+1487,Cinema Seat Allocation,Medium
+1488,Sort Integers by The Power Value,Medium
+1491,Number of Times Binary String Is Prefix-Aligned,Medium
+1492,Time Needed to Inform All Employees,Medium
+1494,Activity Participants,Medium
+1495,Number of Trusted Contacts of a Customer,Medium
+1497,Design a Stack With Increment Operation,Medium
+1498,Find a Corresponding Node of a Binary Tree in a Clone of That Tree,Medium
+1501,Circle and Rectangle Overlapping,Medium
+1502,Construct K Palindrome Strings,Medium
+1507,Check if There is a Valid Path in a Grid,Medium
+1511,Count Number of Teams,Medium
+1512,Design Underground System,Medium
+1515,Find the Minimum Number of Fibonacci Numbers Whose Sum Is K,Medium
+1516,The k-th Lexicographical String of All Happy Strings of Length n,Medium
+1520,Number of Steps to Reduce a Number in Binary Representation to One,Medium
+1523,Capital Gain/Loss,Medium
+1525,Queries on a Permutation With Key,Medium
+1526,HTML Entity Parser,Medium
+1529,Max Difference You Can Get From Changing an Integer,Medium
+1530,Check If a String Can Break Another String,Medium
+1533,Display Table of Food Orders in a Restaurant,Medium
+1534,Minimum Number of Frogs Croaking,Medium
+1536,Customers Who Bought Products A and B but Not C,Medium
+1538,Maximum Points You Can Obtain from Cards,Medium
+1539,Diagonal Traverse II,Medium
+1543,Simplified Fractions,Medium
+1544,Count Good Nodes in Binary Tree,Medium
+1549,Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit,Medium
+1553,Count Triplets That Can Form Two Arrays of Equal XOR,Medium
+1554,Minimum Time to Collect All Apples in a Tree,Medium
+1557,Check If a String Contains All Binary Codes of Size K,Medium
+1558,Course Schedule IV,Medium
+1561,Rearrange Words in a Sentence,Medium
+1562,People Whose List of Favorite Companies Is Not a Subset of Another List,Medium
+1565,Evaluate Boolean Expression,Medium
+1567,Maximum Number of Vowels in a Substring of Given Length,Medium
+1568,Pseudo-Palindromic Paths in a Binary Tree,Medium
+1572,Subrectangle Queries,Medium
+1573,Find Two Non-overlapping Sub-arrays Each With Target Sum,Medium
+1575,Maximum Area of a Piece of Cake After Horizontal and Vertical Cuts,Medium
+1576,Reorder Routes to Make All Paths Lead to the City Zero,Medium
+1578,Apples & Oranges,Medium
+1579,Active Users,Medium
+1581,The k Strongest Values in an Array,Medium
+1582,Design Browser History,Medium
+1585,The kth Factor of n,Medium
+1586,Longest Subarray of 1's After Deleting One Element,Medium
+1604,Least Number of Unique Integers after K Removals,Medium
+1605,Minimum Number of Days to Make m Bouquets,Medium
+1607,Rectangles Area,Medium
+1608,Calculate Salaries,Medium
+1611,Making File Names Unique,Medium
+1612,Avoid Flood in The City,Medium
+1615,Range Sum of Sorted Subarray Sums,Medium
+1616,Minimum Difference Between Largest and Smallest Value in Three Moves,Medium
+1620,Check If Array Pairs Are Divisible by k,Medium
+1621,Number of Subsequences That Satisfy the Given Sum Condition,Medium
+1624,Clone Binary Tree With Random Pointer,Medium
+1627,Last Moment Before All Ants Fall Out of a Plank,Medium
+1628,Count Submatrices With All Ones,Medium
+1631,Number of Sub-arrays With Odd Sum,Medium
+1632,Number of Good Ways to Split a String,Medium
+1634,Clone N-ary Tree,Medium
+1636,Number of Substrings With Only 1s,Medium
+1640,Design a File Sharing System,Medium
+1641,Countries You Can Safely Invest In,Medium
+1643,Number of Nodes in the Sub-Tree With the Same Label,Medium
+1647,Can Convert String in K Moves,Medium
+1648,Minimum Insertions to Balance a Parentheses String,Medium
+1649,Maximum Number of Non-Overlapping Subarrays With Sum Equals Target,Medium
+1650,Find Root of N-Ary Tree,Medium
+1652,Minimum Suffix Flips,Medium
+1653,Number of Good Leaf Nodes Pairs,Medium
+1657,Find the Winner of an Array Game,Medium
+1658,Minimum Swaps to Arrange a Binary Grid,Medium
+1661,Minimum Number of Vertices to Reach All Nodes,Medium
+1662,Minimum Numbers of Function Calls to Make Target Array,Medium
+1663,Detect Cycles in 2D Grid,Medium
+1665,Diameter of N-Ary Tree,Medium
+1667,Find Kth Bit in Nth Binary String,Medium
+1671,The Most Recent Three Orders,Medium
+1672,Find the Index of the Large Integer,Medium
+1674,Minimum Operations to Make Array Equal,Medium
+1675,Magnetic Force Between Two Balls,Medium
+1678,Number of Ways to Split a String,Medium
+1679,Shortest Subarray to be Removed to Make Array Sorted,Medium
+1681,Guess the Majority in a Hidden Array,Medium
+1683,Maximum Number of Coins You Can Get,Medium
+1684,Find Latest Group of Size M,Medium
+1688,The Most Recent Orders for Each Product,Medium
+1690,Maximum Length of Subarray With Positive Product,Medium
+1694,Make Sum Divisible by P,Medium
+1695,Maximum Sum Obtained of Any Permutation,Medium
+1697,Strings Differ by One Character,Medium
+1699,Number of Ways Where Square of Number Is Equal to Product of Two Numbers,Medium
+1700,Minimum Time to Make Rope Colorful,Medium
+1702,Bank Account Summary,Medium
+1703,Put Boxes Into the Warehouse I,Medium
+1705,Count Unhappy Friends,Medium
+1706,Min Cost to Connect All Points,Medium
+1709,Alert Using Same Key-Card Three or More Times in a One Hour Period,Medium
+1711,Find Valid Matrix Given Row and Column Sums,Medium
+1713,Dot Product of Two Sparse Vectors,Medium
+1715,Split a String Into the Max Number of Unique Substrings,Medium
+1716,Maximum Non Negative Product in a Matrix,Medium
+1719,Put Boxes Into the Warehouse II,Medium
+1721,Maximum Profit of Operating a Centennial Wheel,Medium
+1722,Throne Inheritance,Medium
+1725,Number of Sets of K Non-Overlapping Line Segments,Medium
+1726,Coordinate With Maximum Network Quality,Medium
+1729,Binary Search Tree Iterator II,Medium
+1731,Even Odd Tree,Medium
+1735,The Most Frequently Ordered Products for Each Customer,Medium
+1738,Maximal Network Rank,Medium
+1739,Split Two Strings to Make Palindrome,Medium
+1742,Widest Vertical Area Between Two Points Containing No Points,Medium
+1743,Count Substrings That Differ by One Character,Medium
+1745,Find Nearest Right Node in Binary Tree,Medium
+1747,Lexicographically Smallest String After Applying Operations,Medium
+1748,Best Team With No Conflicts,Medium
+1750,Check If Two Expression Trees are Equivalent,Medium
+1752,Arithmetic Subarrays,Medium
+1753,Path With Minimum Effort,Medium
+1756,Minimum Deletions to Make String Balanced,Medium
+1757,Minimum Jumps to Reach Home,Medium
+1759,Find the Missing IDs,Medium
+1761,Count Sorted Vowel Strings,Medium
+1762,Furthest Building You Can Reach,Medium
+1765,Merge In Between Linked Lists,Medium
+1767,Design Front Middle Back Queue,Medium
+1768,Design an Expression Tree With Evaluate Function,Medium
+1770,Minimum Deletions to Make Character Frequencies Unique,Medium
+1771,Sell Diminishing-Valued Colored Balls,Medium
+1774,Add Two Polynomials Represented as Linked Lists,Medium
+1776,Minimum Operations to Reduce X to Zero,Medium
+1777,Determine if Two Strings Are Close,Medium
+1780,Lowest Common Ancestor of a Binary Tree II,Medium
+1782,Smallest String With A Given Numeric Value,Medium
+1783,Ways to Make a Fair Array,Medium
+1787,Sum of Absolute Differences in a Sorted Array,Medium
+1788,Stone Game VI,Medium
+1790,Lowest Common Ancestor of a Binary Tree III,Medium
+1792,Find the Most Competitive Subsequence,Medium
+1793,Minimum Moves to Make Array Complementary,Medium
+1796,Correct a Binary Tree,Medium
+1798,Max Number of K-Sum Pairs,Medium
+1800,Concatenation of Consecutive Binary Numbers,Medium
+1803,Average Waiting Time,Medium
+1804,Maximum Binary String After Change,Medium
+1807,Partitioning Into Minimum Number Of Deci-Binary Numbers,Medium
+4,Median of Two Sorted Arrays,Hard
+10,Regular Expression Matching,Hard
+23,Merge k Sorted Lists,Hard
+25,Reverse Nodes in k-Group,Hard
+30,Substring with Concatenation of All Words,Hard
+32,Longest Valid Parentheses,Hard
+37,Sudoku Solver,Hard
+41,First Missing Positive,Hard
+42,Trapping Rain Water,Hard
+44,Wildcard Matching,Hard
+51,N-Queens,Hard
+52,N-Queens II,Hard
+60,Permutation Sequence,Hard
+65,Valid Number,Hard
+68,Text Justification,Hard
+72,Edit Distance,Hard
+76,Minimum Window Substring,Hard
+84,Largest Rectangle in Histogram,Hard
+85,Maximal Rectangle,Hard
+87,Scramble String,Hard
+115,Distinct Subsequences,Hard
+123,Best Time to Buy and Sell Stock III,Hard
+124,Binary Tree Maximum Path Sum,Hard
+126,Word Ladder II,Hard
+127,Word Ladder,Hard
+132,Palindrome Partitioning II,Hard
+135,Candy,Hard
+140,Word Break II,Hard
+149,Max Points on a Line,Hard
+154,Find Minimum in Rotated Sorted Array II,Hard
+158,Read N Characters Given read4 II - Call Multiple Times,Hard
+164,Maximum Gap,Hard
+174,Dungeon Game,Hard
+185,Department Top Three Salaries,Hard
+188,Best Time to Buy and Sell Stock IV,Hard
+212,Word Search II,Hard
+214,Shortest Palindrome,Hard
+218,The Skyline Problem,Hard
+224,Basic Calculator,Hard
+233,Number of Digit One,Hard
+239,Sliding Window Maximum,Hard
+248,Strobogrammatic Number III,Hard
+262,Trips and Users,Hard
+265,Paint House II,Hard
+269,Alien Dictionary,Hard
+272,Closest Binary Search Tree Value II,Hard
+273,Integer to English Words,Hard
+282,Expression Add Operators,Hard
+295,Find Median from Data Stream,Hard
+296,Best Meeting Point,Hard
+297,Serialize and Deserialize Binary Tree,Hard
+301,Remove Invalid Parentheses,Hard
+302,Smallest Rectangle Enclosing Black Pixels,Hard
+305,Number of Islands II,Hard
+308,Range Sum Query 2D - Mutable,Hard
+312,Burst Balloons,Hard
+315,Count of Smaller Numbers After Self,Hard
+317,Shortest Distance from All Buildings,Hard
+321,Create Maximum Number,Hard
+327,Count of Range Sum,Hard
+329,Longest Increasing Path in a Matrix,Hard
+330,Patching Array,Hard
+332,Reconstruct Itinerary,Hard
+335,Self Crossing,Hard
+336,Palindrome Pairs,Hard
+352,Data Stream as Disjoint Intervals,Hard
+354,Russian Doll Envelopes,Hard
+358,Rearrange String k Distance Apart,Hard
+363,Max Sum of Rectangle No Larger Than K,Hard
+381,Insert Delete GetRandom O(1) - Duplicates allowed,Hard
+391,Perfect Rectangle,Hard
+403,Frog Jump,Hard
+407,Trapping Rain Water II,Hard
+410,Split Array Largest Sum,Hard
+411,Minimum Unique Word Abbreviation,Hard
+420,Strong Password Checker,Hard
+425,Word Squares,Hard
+432,All Oone Data Structure,Hard
+440,K-th Smallest in Lexicographical Order,Hard
+446,Arithmetic Slices II - Subsequence,Hard
+458,Poor Pigs,Hard
+460,LFU Cache,Hard
+465,Optimal Account Balancing,Hard
+466,Count The Repetitions,Hard
+471,Encode String with Shortest Length,Hard
+472,Concatenated Words,Hard
+479,Largest Palindrome Product,Hard
+480,Sliding Window Median,Hard
+483,Smallest Good Base,Hard
+488,Zuma Game,Hard
+489,Kth Smallest Instructions,Hard
+493,Reverse Pairs,Hard
+499,The Maze III,Hard
+502,IPO,Hard
+514,Freedom Trail,Hard
+517,Super Washing Machines,Hard
+527,Word Abbreviation,Hard
+546,Remove Boxes,Hard
+548,Split Array with Equal Sum,Hard
+552,Student Attendance Record II,Hard
+564,Find the Closest Palindrome,Hard
+568,Maximum Vacation Days,Hard
+569,Median Employee Salary,Hard
+571,Find Median Given Frequency of Numbers,Hard
+579,Find Cumulative Salary of an Employee,Hard
+587,Erect the Fence,Hard
+588,Design In-Memory File System,Hard
+591,Tag Validator,Hard
+600,Non-negative Integers without Consecutive Ones,Hard
+601,Human Traffic of Stadium,Hard
+615,Average Salary: Departments VS Company,Hard
+618,Students Report By Geography,Hard
+629,K Inverse Pairs Array,Hard
+630,Course Schedule III,Hard
+631,Design Excel Sum Formula,Hard
+632,Smallest Range Covering Elements from K Lists,Hard
+639,Decode Ways II,Hard
+642,Design Search Autocomplete System,Hard
+644,Maximum Average Subarray II,Hard
+656,Coin Path,Hard
+660,Remove 9,Hard
+664,Strange Printer,Hard
+668,Kth Smallest Number in Multiplication Table,Hard
+675,Cut Off Trees for Golf Event,Hard
+679,24 Game,Hard
+683,K Empty Slots,Hard
+685,Redundant Connection II,Hard
+689,Maximum Sum of 3 Non-Overlapping Subarrays,Hard
+691,Stickers to Spell Word,Hard
+699,Falling Squares,Hard
+711,Number of Distinct Islands II,Hard
+715,Range Module,Hard
+719,Find K-th Smallest Pair Distance,Hard
+726,Number of Atoms,Hard
+727,Minimum Window Subsequence,Hard
+730,Count Different Palindromic Subsequences,Hard
+732,My Calendar III,Hard
+736,Parse Lisp Expression,Hard
+741,Cherry Pickup,Hard
+746,Prefix and Suffix Search,Hard
+750,Contain Virus,Hard
+754,Cracking the Safe,Hard
+759,Set Intersection Size At Least Two,Hard
+761,Employee Free Time,Hard
+763,Special Binary String,Hard
+765,Serialize and Deserialize N-ary Tree,Hard
+770,Couples Holding Hands,Hard
+771,Encode N-ary Tree to Binary Tree,Hard
+779,Max Chunks To Make Sorted II,Hard
+781,Basic Calculator IV,Hard
+785,Basic Calculator III,Hard
+787,Sliding Puzzle,Hard
+788,Minimize Max Distance to Gas Station,Hard
+794,Swim in Rising Water,Hard
+796,Reaching Points,Hard
+798,Transform to Chessboard,Hard
+802,K-th Smallest Prime Fraction,Hard
+809,Preimage Size of Factorial Zeroes Function,Hard
+814,Smallest Rotation with Highest Score,Hard
+819,Minimum Swaps To Make Sequences Increasing,Hard
+821,Bricks Falling When Hit,Hard
+823,Split Array With Same Average,Hard
+828,Chalkboard XOR Game,Hard
+833,Bus Routes,Hard
+836,Race Car,Hard
+854,Making A Large Island,Hard
+855,Count Unique Characters of All Substrings of a Given String,Hard
+856,Consecutive Numbers Sum,Hard
+863,Sum of Distances in Tree,Hard
+865,Robot Room Cleaner,Hard
+869,Similar String Groups,Hard
+873,Guess the Word,Hard
+877,Shortest Path Visiting All Nodes,Hard
+880,Rectangle Area II,Hard
+884,K-Similar Strings,Hard
+887,Minimum Cost to Hire K Workers,Hard
+892,Shortest Subarray with Sum at Least K,Hard
+894,Random Pick with Blacklist,Hard
+895,Shortest Path to Get All Keys,Hard
+902,Minimum Number of Refueling Stops,Hard
+910,Nth Magical Number,Hard
+911,Profitable Schemes,Hard
+918,Reachable Nodes In Subdivided Graph,Hard
+923,Super Egg Drop,Hard
+927,Sum of Subsequence Widths,Hard
+931,Maximum Frequency Stack,Hard
+935,Orderly Queue,Hard
+938,Numbers At Most N Given Digit Set,Hard
+939,Valid Permutations for DI Sequence,Hard
+942,Super Palindromes,Hard
+949,Cat and Mouse,Hard
+956,Number of Music Playlists,Hard
+960,Minimize Malware Spread,Hard
+963,Three Equal Parts,Hard
+964,Minimize Malware Spread II,Hard
+973,Stamping The Sequence,Hard
+977,Distinct Subsequences II,Hard
+980,Find the Shortest Superstring,Hard
+989,Largest Component Size by Common Factor,Hard
+993,Tallest Billboard,Hard
+1000,Delete Columns to Make Sorted III,Hard
+1004,Least Operators to Express Number,Hard
+1008,Binary Tree Cameras,Hard
+1012,Equal Rational Numbers,Hard
+1017,Odd Even Jump,Hard
+1022,Unique Paths III,Hard
+1024,Triples with Bitwise AND Equal To Zero,Hard
+1029,Vertical Order Traversal of a Binary Tree,Hard
+1034,Subarrays with K Different Integers,Hard
+1037,Minimum Number of K Consecutive Bit Flips,Hard
+1038,Number of Squareful Arrays,Hard
+1042,Minimum Cost to Merge Stones,Hard
+1043,Grid Illumination,Hard
+1057,Numbers With Repeated Digits,Hard
+1061,Number of Valid Subarrays,Hard
+1068,Digit Count in Range,Hard
+1077,Confusing Number II,Hard
+1093,Recover a Tree From Preorder Traversal,Hard
+1097,Stream of Characters,Hard
+1106,Escape a Large Maze,Hard
+1118,Divide Array Into Increasing Sequences,Hard
+1122,Longest Duplicate Substring,Hard
+1124,String Transforms Into Another String,Hard
+1133,Last Substring in Lexicographical Order,Hard
+1144,Optimize Water Distribution in a Village,Hard
+1145,Number of Submatrices That Sum to Target,Hard
+1152,Maximum Number of Ones,Hard
+1167,Minimum Time to Build Blocks,Hard
+1170,Shortest Common Supersequence ,Hard
+1178,Valid Palindrome III,Hard
+1185,Find in Mountain Array,Hard
+1188,Brace Expansion II,Hard
+1192,Divide Chocolate,Hard
+1193,Game Play Analysis V,Hard
+1197,Parsing A Boolean Expression,Hard
+1202,Palindrome Removal,Hard
+1213,Handshakes That Don't Cross,Hard
+1220,Smallest Sufficient Team,Hard
+1223,Graph Connectivity With Threshold,Hard
+1224,Minimum Falling Path Sum II,Hard
+1226,User Purchase Platform,Hard
+1233,Number of Ships in a Rectangle,Hard
+1234,Number of Paths with Max Score,Hard
+1244,Distinct Echo Substrings,Hard
+1251,Longest Chunked Palindrome Decomposition,Hard
+1255,Reverse Subarray To Maximize Array Value,Hard
+1257,Rank Transform of a Matrix,Hard
+1262,Online Majority Element In Subarray,Hard
+1269,Market Analysis II,Hard
+1270,Dinner Plate Stacks,Hard
+1277,Largest Multiple of Three,Hard
+1282,Number of Valid Words for Each Puzzle,Hard
+1286,Constrained Subsequence Sum,Hard
+1290,Make Array Strictly Increasing,Hard
+1296,Kth Ancestor of a Tree Node,Hard
+1300,Critical Connections in a Network,Hard
+1305,Number of Visible People in a Queue,Hard
+1309,Sort Items by Groups Respecting Dependencies,Hard
+1313,Count Ways to Build Rooms in an Ant Colony,Hard
+1318,Tournament Winners,Hard
+1322,Minimum Moves to Reach Target with Rotations,Hard
+1326,Sum of Floored Pairs,Hard
+1332,Count Vowels Permutation,Hard
+1336,Maximum Product of the Length of Two Palindromic Substrings,Hard
+1337,Design Skiplist,Hard
+1343,Dice Roll Simulation,Hard
+1344,Maximum Equal Frequency,Hard
+1347,Distance to a Cycle in Undirected Graph,Hard
+1352,Maximum Profit in Job Scheduling,Hard
+1356,Minimum Number of Moves to Make Palindrome,Hard
+1357,Report Contiguous Dates,Hard
+1361,Tiling a Rectangle with the Fewest Squares,Hard
+1367,Maximum Height by Stacking Cuboids ,Hard
+1372,Check If It Is a Good Array,Hard
+1381,Maximum Score Words Formed by Letters,Hard
+1389,Minimum Moves to Move a Box to Their Target Location,Hard
+1393,Maximum Value of K Coins From Piles,Hard
+1398,Number of Ways to Stay in the Same Place After Some Steps,Hard
+1403,Palindrome Partitioning III,Hard
+1409,Minimum Number of Flips to Convert Binary Matrix to Zero Matrix,Hard
+1414,Shortest Path in a Grid with Obstacles Elimination,Hard
+1424,Maximum Candies You Can Get from Boxes,Hard
+1429,Verbal Arithmetic Puzzle,Hard
+1433,Encrypt and Decrypt Strings,Hard
+1437,Minimum Insertion Steps to Make a String Palindrome,Hard
+1443,Minimum Distance to Type a Word Using Two Fingers,Hard
+1447,Jump Game IV,Hard
+1451,Minimum Number of Taps to Open to Water a Garden,Hard
+1457,Minimum Difficulty of a Job Schedule,Hard
+1461,Count All Valid Pickup and Delivery Options,Hard
+1466,Jump Game V,Hard
+1467,Number of Transactions per Visit,Hard
+1471,Maximum Students Taking Exam,Hard
+1475,Maximum Sum BST in Binary Tree,Hard
+1479,Construct Target Array With Multiple Sums,Hard
+1485,Minimum Cost to Make at Least One Valid Path in a Grid,Hard
+1489,Pizza With 3n Slices,Hard
+1493,Frog Position After T Seconds,Hard
+1499,Maximum Performance of a Team,Hard
+1503,Reducing Dishes,Hard
+1504,Get the Second Most Recent Activity,Hard
+1508,Longest Happy Prefix,Hard
+1513,Find All Good Strings,Hard
+1517,Restore The Array,Hard
+1518,Total Sales Amount by Year,Hard
+1522,Stone Game III,Hard
+1527,Number of Ways to Paint N × 3 Grid,Hard
+1531,Number of Ways to Wear Different Hats to Each Other,Hard
+1535,Build Array Where You Can Find The Maximum Exactly K Comparisons,Hard
+1545,Form Largest Integer With Digits That Add up to Target,Hard
+1546,Find the Quiet Students in All Exams,Hard
+1550,Find the Kth Smallest Sum of a Matrix With Sorted Rows,Hard
+1555,Number of Ways of Cutting a Pizza,Hard
+1559,Cherry Pickup II,Hard
+1563,Maximum Number of Darts Inside of a Circular Dartboard,Hard
+1569,Max Dot Product of Two Subsequences,Hard
+1571,Allocate Mailboxes,Hard
+1577,Probability of a Two Boxes Having The Same Number of Distinct Balls,Hard
+1583,Paint House III,Hard
+1587,Parallel Courses II,Hard
+1613,Find Critical and Pseudo-Critical Edges in Minimum Spanning Tree,Hard
+1617,Stone Game IV,Hard
+1622,Max Value of Equation,Hard
+1623,Sales by Day of the Week,Hard
+1629,Minimum Possible Integer After at Most K Adjacent Swaps On Digits,Hard
+1633,Minimum Number of Increments on Subarrays to Form a Target Array,Hard
+1637,String Compression II,Hard
+1638,Best Position for a Service Centre,Hard
+1644,Maximum Number of Non-Overlapping Substrings,Hard
+1645,Find a Value of a Mysterious Function Closest to Target,Hard
+1655,Move Sub-Tree of N-Ary Tree,Hard
+1659,Get the Maximum Score,Hard
+1668,Find Longest Awesome Substring,Hard
+1669,Minimum Cost to Cut a Stick,Hard
+1676,Minimum Number of Days to Eat N Oranges,Hard
+1680,Count All Possible Routes,Hard
+1685,Stone Game V,Hard
+1687,The Most Similar Path in a Graph,Hard
+1691,Minimum Number of Days to Disconnect Island,Hard
+1692,Number of Ways to Reorder Array to Get Same BST,Hard
+1696,Strange Printer II,Hard
+1701,Remove Max Number of Edges to Keep Graph Fully Traversable,Hard
+1707,Check If String Is Transformable With Substring Sort Operations,Hard
+1710,Find Servers That Handled Most Number of Requests,Hard
+1717,Minimum Cost to Connect Two Groups of Points,Hard
+1723,Maximum Number of Achievable Transfer Requests,Hard
+1727,Cat and Mouse II,Hard
+1728,Fancy Sequence,Hard
+1732,Minimum One Bit Operations to Make Integers Zero,Hard
+1733,Maximum Number of Visible Points,Hard
+1736,Build Binary Expression Tree From Infix Expression,Hard
+1740,Count Subtrees With Max Distance Between Cities,Hard
+1744,Number of Ways to Form a Target String Given a Dictionary,Hard
+1758,Distribute Repeating Integers,Hard
+1766,Minimum Number of Removals to Make Mountain Array,Hard
+1772,Create Sorted Array through Instructions,Hard
+1778,Maximize Grid Happiness,Hard
+1779,Hopper Company Queries I,Hard
+1784,Minimum Initial Energy to Finish Tasks,Hard
+1785,Hopper Company Queries II,Hard
+1789,Delivering Boxes from Storage to Ports,Hard
+1794,Minimize Deviation in Array,Hard
+1795,Hopper Company Queries III,Hard
+1799,Minimum Incompatibility,Hard
+1805,Minimum Adjacent Swaps for K Consecutive Ones,Hard
+1809,Sum Of Special Evenly-Spaced Elements In Array,Hard
+1815,Checking Existence of Edge Length Limited Paths,Hard
+1820,Number Of Ways To Reconstruct A Tree,Hard
+1825,Find Minimum Time to Finish All Jobs,Hard
+1826,Maximum XOR With an Element From Array,Hard
+1828,Count Ways to Distribute Candies,Hard
+1832,Minimum Operations to Make a Subsequence,Hard
+1836,Count Ways to Make Array With Product,Hard
+1851,Maximum Number of Events That Can Be Attended II,Hard
+1861,Building Boxes,Hard
+1865,Checking Existence of Edge Length Limited Paths II,Hard
+1871,Palindrome Partitioning IV,Hard
+1875,Tree of Coprimes,Hard
+1881,Closest Subsequence Sum,Hard
+1887,Minimum Degree of a Connected Trio in a Graph,Hard
+1891,Count Pairs Of Nodes,Hard
+1897,Maximize Palindrome Length From Subsequences,Hard
+1902,Car Fleet II,Hard
+1906,Maximize Score After N Operations,Hard
+1907,Count Pairs With XOR in a Range,Hard
+1913,Make the XOR of All Segments Equal to Zero,Hard
+1914,Find the Subtasks That Did Not Execute,Hard
+1918,Maximum Score of a Good Subarray,Hard
+1924,Maximum Number of Groups Getting Fresh Donuts,Hard
+1936,Maximize Number of Nice Divisors,Hard
+1937,Maximize the Beauty of the Garden,Hard
+1941,Minimum Number of Operations to Make String Sorted,Hard
+1947,Number of Different Subsequences GCDs,Hard
+1953,Finding MK Average,Hard
+1957,Closest Room,Hard
+1963,Find XOR Sum of All Pairs Bitwise AND,Hard
+1968,Maximum Building Height,Hard
+1977,Minimum Interval to Include Each Query,Hard
+1986,Largest Color Value in a Directed Graph,Hard
+1989,Minimum XOR Sum of Two Arrays,Hard
+1996,Number of Ways to Rearrange Sticks With K Sticks Visible,Hard
+1997,Next Palindrome Using Same Digits,Hard
+2002,Stone Game VIII,Hard
+2008,Minimum Cost to Change the Final Value of Expression,Hard
+2013,Minimum Skips to Arrive at Meeting On Time,Hard
+2018,Minimum Space Wasted From Packaging,Hard
+2023,Design Movie Rental System,Hard
+2028,The Earliest and Latest Rounds Where Players Compete,Hard
+2040,Minimum Cost to Reach Destination in Time,Hard
+2046,Page Recommendations II,Hard
+2051,Longest Common Subpath,Hard
+2060,Merge BSTs to Create Single BST,Hard
+2061,Painting a Grid With Three Different Colors,Hard
+2063,Leetcodify Friends Recommendations,Hard
+2064,Leetcodify Similar Friends,Hard
+2068,Maximum Genetic Difference Query,Hard
+2073,Minimum Time For K Virus Variants to Spread,Hard
+2074,Erect the Fence II,Hard
+2079,Delete Duplicate Folders in System,Hard
+2086,Count Number of Special Subsequences,Hard
+2091,Number of Ways to Separate Numbers,Hard
+2096,Find the Longest Valid Obstacle Course at Each Position,Hard
+2101,Last Day Where You Can Still Cross,Hard
+2105,The Number of Good Subsets,Hard
+2109,Find Array Given Subset Sums,Hard
+2115,Number of Unique Good Subsequences,Hard
+2119,Minimum Number of Operations to Make Array Continuous,Hard
+2120,First and Last Call On the Same Day,Hard
+2125,GCD Sort of an Array,Hard
+2131,Smallest Missing Genetic Value in Each Subtree,Hard
+2135,Maximum Number of Ways to Partition an Array,Hard
+2140,Longest Subsequence Repeated k Times,Hard
+2147,The Score of Students Solving Math Expression,Hard
+2150,Kth Smallest Product of Two Sorted Arrays,Hard
+2152,The Number of Seniors and Juniors to Join the Company,Hard
+2153,Subtree Removal Game with Fibonacci Tree,Hard
+2157,Smallest K-Length Subsequence With Occurrences of a Letter,Hard
+2158,The Number of Seniors and Juniors to Join the Company II,Hard
+2162,Partition Array Into Two Arrays to Minimize Sum Difference,Hard
+2166,Number of Valid Move Combinations On Chessboard,Hard
+2171,Second Minimum Time to Reach Destination,Hard
+2176,Parallel Courses III,Hard
+2180,Maximum Number of Tasks You Can Assign,Hard
+2184,Check if an Original String Exists Given Two Encoded Strings,Hard
+2189,Maximum Path Quality of a Graph,Hard
+2193,Count Fertile Pyramids in a Land,Hard
+2198,Process Restricted Friend Requests,Hard
+2200,Stamping the Grid,Hard
+2201,Valid Arrangement of Pairs,Hard
+2202,Sum of k-Mirror Numbers,Hard
+2207,Sequentially Ordinal Rank Tracker,Hard
+2213,Find All People With Secret,Hard
+2222,Abbreviating the Product of a Range,Hard
+2229,Maximum Fruits Harvested After at Most K Steps,Hard
+2234,Minimum Operations to Make the Array K-Increasing,Hard
+2241,Recover the Original Array,Hard
+2246,Maximum Employees to Be Invited to a Meeting,Hard
+2251,Number of Ways to Divide a Long Corridor,Hard
+2253,Build the Equation,Hard
+2257,Earliest Possible Day of Full Bloom,Hard
+2259,Minimum Operations to Remove Adjacent Ones in Matrix,Hard
+2263,Maximum Running Time of N Computers,Hard
+2267,Minimum Difference in Sums After Removal of Elements,Hard
+2272,Maximum Good People Based on Statements,Hard
+2275,Find Substring With Given Hash Value,Hard
+2276,Groups of Strings,Hard
+2280,Count Good Triplets in an Array,Hard
+2282,Choose Numbers From Two Arrays in Range,Hard
+2286,Minimum Time to Remove All Cars Containing Illegal Goods,Hard
+2291,Maximum AND Sum of Array,Hard
+2295,Minimum Time to Finish the Race,Hard
+2296,The Number of Passengers in Each Bus II,Hard
+2297,Amount of New Area Painted Each Day,Hard
+2301,Count Array Pairs Divisible by K,Hard
+2307,Replace Non-Coprime Numbers in Array,Hard
+2311,Minimum White Tiles After Covering With Carpets,Hard
+2313,Longest Winning Streak,Hard
+2319,Longest Substring of One Repeating Character,Hard
+2321,Minimum Weighted Subgraph With the Required Paths,Hard
+2326,Sum of Scores of Built Strings,Hard
+2330,Maximum Total Beauty of the Gardens,Hard
+2335,Finding the Topic of Each Post,Hard
+`;
+
+    // --- CSV Parsing ---
+    function parseCSV(csv) {
+      const lines = csv.trim().split('\n');
+      let headers = lines[0].split(',').map(h => h.trim());
+      // If first header is not "Question ID", skip to next header row
+      if (!headers.includes('Question ID')) {
+        for (let i = 1; i < lines.length; ++i) {
+          const row = lines[i].split(',').map(h => h.trim());
+          if (row.includes('Question ID')) {
+            headers = row;
+            lines.splice(0, i);
+            break;
+          }
+        }
+      }
+      return lines.slice(1).map(line => {
+        let row = [], cur = '', inQuotes = false;
+        for (let i = 0; i < line.length; ++i) {
+          if (line[i] === '"') inQuotes = !inQuotes;
+          else if (line[i] === ',' && !inQuotes) { row.push(cur); cur = ''; }
+          else cur += line[i];
+        }
+        row.push(cur);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = row[i] ? row[i].trim() : '');
+        return obj;
+      });
+    }
+
+    // --- LocalStorage Key ---
+    const STORAGE_KEY = 'leetcode_dsa_dashboard_progress';
+
+    // --- Load Progress ---
+    function loadProgress() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch { return {}; }
+    }
+    function saveProgress(progress) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    }
+
+    // --- Main State ---
+    let questions = parseCSV(csvData);
+    let progress = loadProgress();
+
+    // --- Group and sort by Difficulty ---
+    function groupByDifficulty(questions) {
+      const groups = { Easy: [], Medium: [], Hard: [] };
+      questions.forEach(q => {
+        if (groups[q['Difficulty Level']]) groups[q['Difficulty Level']].push(q);
+      });
+      return groups;
+    }
+
+    // --- Pagination State ---
+    const PAGE_SIZE = 100;
+    let pageState = { Easy: 1, Medium: 1, Hard: 1 };
+
+    // --- Render Dashboard ---
+    function renderDashboard() {
+      const groups = groupByDifficulty(questions);
+      let easySolved = 0, mediumSolved = 0, hardSolved = 0;
+      groups.Easy.forEach(q => { if (progress[q['Question ID']]) easySolved++; });
+      groups.Medium.forEach(q => { if (progress[q['Question ID']]) mediumSolved++; });
+      groups.Hard.forEach(q => { if (progress[q['Question ID']]) hardSolved++; });
+
+      document.getElementById('easy-count').textContent = `${easySolved} / ${groups.Easy.length}`;
+      document.getElementById('medium-count').textContent = `${mediumSolved} / ${groups.Medium.length}`;
+      document.getElementById('hard-count').textContent = `${hardSolved} / ${groups.Hard.length}`;
+
+      animateCircularProgress('easy-circular', groups.Easy.length ? Math.round(100 * easySolved / groups.Easy.length) : 0, '#00e676', 'easy-percentage');
+      animateCircularProgress('medium-circular', groups.Medium.length ? Math.round(100 * mediumSolved / groups.Medium.length) : 0, '#ffea00', 'medium-percentage');
+      animateCircularProgress('hard-circular', groups.Hard.length ? Math.round(100 * hardSolved / groups.Hard.length) : 0, '#ff3d00', 'hard-percentage');
+
+      renderBarChart(easySolved, mediumSolved, hardSolved, groups);
+    }
+
+    // --- Animate Circular Progress ---
+    function animateCircularProgress(id, percent, color, percentageId) {
+      const circularProgress = document.getElementById(id);
+      let progressValue = document.getElementById(percentageId);
+      let startValue = 0;
+      let speed = 12;
+      clearInterval(circularProgress._interval);
+      circularProgress._interval = setInterval(() => {
+        startValue++;
+        progressValue.textContent = `${startValue}%`;
+        circularProgress.style.background = `conic-gradient(${color} ${startValue * 3.6}deg, #23272f 0deg)`;
+        if (startValue >= percent) clearInterval(circularProgress._interval);
+      }, speed);
+      if (percent === 0) {
+        progressValue.textContent = '0%';
+        circularProgress.style.background = `conic-gradient(#23272f 0deg, #23272f 360deg)`;
+      }
+    }
+
+    // --- Render Bar Chart ---
+    let barChartInstance = null;
+    function renderBarChart(easy, medium, hard, groups) {
+      const ctx = document.getElementById('barChart').getContext('2d');
+      if (barChartInstance) barChartInstance.destroy();
+      barChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Easy', 'Medium', 'Hard'],
+          datasets: [{
+            label: 'Solved',
+            data: [easy, medium, hard],
+            backgroundColor: ['#00e676', '#ffea00', '#ff3d00'],
+            borderRadius: 6
+          },
+          {
+            label: 'Total',
+            data: [groups.Easy.length, groups.Medium.length, groups.Hard.length],
+            backgroundColor: ['#263238', '#263238', '#263238'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#b0b8c1' } },
+            title: { display: true, text: 'Problems Solved by Difficulty', color: '#fff' }
+          },
+          scales: {
+            x: { ticks: { color: '#b0b8c1' } },
+            y: { beginAtZero: true, ticks: { color: '#b0b8c1', stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    // --- Render Paginated Questions Columns ---
+    function renderQuestions() {
+      const groups = groupByDifficulty(questions);
+      const container = document.getElementById('questions-columns');
+      container.innerHTML = '';
+
+      ['Easy', 'Medium', 'Hard'].forEach(diff => {
+        const totalPages = Math.ceil(groups[diff].length / PAGE_SIZE);
+        const curPage = pageState[diff];
+        const startIdx = (curPage - 1) * PAGE_SIZE;
+        const endIdx = Math.min(startIdx + PAGE_SIZE, groups[diff].length);
+        const pageQuestions = groups[diff].slice(startIdx, endIdx);
+
+        const colDiv = document.createElement('div');
+        colDiv.className = 'questions-col';
+
+        // Header + Pagination
+        const header = document.createElement('h3');
+        header.textContent = `${diff} (${startIdx + 1} - ${endIdx} of ${groups[diff].length})`;
+        header.style.color = diff === 'Easy' ? '#00e676' : diff === 'Medium' ? '#ffea00' : '#ff3d00';
+        colDiv.appendChild(header);
+
+        // Pagination controls
+        const pagDiv = document.createElement('div');
+        pagDiv.className = 'pagination';
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '←';
+        prevBtn.disabled = curPage === 1;
+        prevBtn.onclick = () => { pageState[diff]--; renderQuestions(); };
+        pagDiv.appendChild(prevBtn);
+
+        for (let i = 1; i <= totalPages; ++i) {
+          if (i === 1 || i === totalPages || Math.abs(i - curPage) <= 1) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            if (i === curPage) btn.className = 'active';
+            btn.onclick = () => { pageState[diff] = i; renderQuestions(); };
+            pagDiv.appendChild(btn);
+          } else if ((i === curPage - 2 && i > 1) || (i === curPage + 2 && i < totalPages)) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.style.margin = '0 0.3em';
+            pagDiv.appendChild(ellipsis);
+          }
+        }
+
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = '→';
+        nextBtn.disabled = curPage === totalPages;
+        nextBtn.onclick = () => { pageState[diff]++; renderQuestions(); };
+        pagDiv.appendChild(nextBtn);
+
+        colDiv.appendChild(pagDiv);
+
+        // Table
+        const table = document.createElement('table');
+        table.className = 'questions-table';
+        const thead = document.createElement('thead');
+        thead.innerHTML = `<tr>
+          <th>Status</th>
+          <th>#</th>
+          <th>Title</th>
+        </tr>`;
+        table.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        pageQuestions.forEach(q => {
+          const tr = document.createElement('tr');
+          // Checkbox
+          const tdStatus = document.createElement('td');
+          tdStatus.style.textAlign = 'center';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = !!progress[q['Question ID']];
+          cb.addEventListener('change', function() {
+            progress[q['Question ID']] = cb.checked;
+            saveProgress(progress);
+            renderDashboard();
+          });
+          tdStatus.appendChild(cb);
+          // Ques #
+          const tdNum = document.createElement('td');
+          tdNum.textContent = q['Question ID'];
+          // Title
+          const tdTitle = document.createElement('td');
+          tdTitle.textContent = q['Question Title'];
+          tr.appendChild(tdStatus);
+          tr.appendChild(tdNum);
+          tr.appendChild(tdTitle);
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        colDiv.appendChild(table);
+
+        container.appendChild(colDiv);
+      });
+    }
+
+    // --- Init ---
+    renderDashboard();
+    renderQuestions();
+  </script>
+</body>
+</html>
